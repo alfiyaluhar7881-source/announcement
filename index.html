@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Samaj Announcement Form</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;800&display=swap">
+<style>
+/* Layout: one phone-first column — language switch, type tiles, fields, preview, send */
+:root {
+  --bg: #f2f4ef;
+  --card: #ffffff;
+  --fg: #1b2420;
+  --muted: #5d6a63;
+  --line: #d4dcd6;
+  --accent: #0f7a4a;
+  --accent-ink: #ffffff;
+  --marigold: #c98a00;
+  --tile-on: #fff6dd;
+  --bubble: #dcf8c6;
+  --bubble-ink: #1b2420;
+  --error: #b3261e;
+  --somber: #4a5551;
+  --font: "Mukta", "Nirmala UI", "Noto Sans Devanagari", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101513; --card: #19201d; --fg: #e6ece8; --muted: #9eaba4; --line: #2d3833;
+    --accent: #2bb673; --accent-ink: #07140d; --marigold: #e8b23a; --tile-on: #2e2812;
+    --bubble: #1f4a33; --bubble-ink: #e6ece8; --error: #f2958c; --somber: #aab5b0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101513; --card: #19201d; --fg: #e6ece8; --muted: #9eaba4; --line: #2d3833;
+  --accent: #2bb673; --accent-ink: #07140d; --marigold: #e8b23a; --tile-on: #2e2812;
+  --bubble: #1f4a33; --bubble-ink: #e6ece8; --error: #f2958c; --somber: #aab5b0;
+  color-scheme: dark;
+}
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 17px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 56px;
+}
+.wrap { max-width: 560px; margin: 0 auto; display: grid; gap: 18px; }
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+h1 { font-size: 1.6rem; font-weight: 800; margin: 0; line-height: 1.15; text-wrap: balance; }
+.sub { color: var(--muted); margin: 4px 0 0; font-size: 0.95rem; }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--card); }
+.lang button { font: inherit; font-size: 0.95rem; font-weight: 600; border: 0; background: transparent; color: var(--fg); padding: 6px 14px; cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.step { font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--marigold); margin-bottom: 8px; }
+.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.tile {
+  font: inherit; font-size: 0.88rem; font-weight: 600; line-height: 1.2; color: var(--fg);
+  background: var(--card); border: 1.5px solid var(--line); border-radius: 12px;
+  padding: 10px 4px; display: grid; justify-items: center; gap: 4px; cursor: pointer; text-align: center;
+}
+.tile .ic { font-size: 1.5rem; line-height: 1; }
+.tile[aria-pressed="true"] { border-color: var(--marigold); background: var(--tile-on); }
+.tile:focus-visible, .btn:focus-visible, .lang button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 14px; }
+.field { display: grid; gap: 5px; min-width: 0; }
+.field label { font-weight: 600; }
+.req { color: var(--error); }
+.opt { color: var(--muted); font-weight: 400; font-size: 0.85rem; }
+input, textarea {
+  font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line);
+  border-radius: 10px; padding: 11px 12px; width: 100%; box-sizing: border-box; min-height: 48px;
+}
+textarea { min-height: 80px; resize: vertical; }
+input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+.field.bad input, .field.bad textarea { border-color: var(--error); }
+.err { color: var(--error); font-weight: 600; font-size: 0.92rem; }
+.bubble {
+  background: var(--bubble); color: var(--bubble-ink); border-radius: 12px 12px 12px 3px;
+  padding: 12px 14px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.98rem; min-height: 60px;
+}
+.btn {
+  font: inherit; font-weight: 800; font-size: 1.05rem; border-radius: 12px; padding: 14px 18px;
+  min-height: 52px; cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--accent);
+}
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-ghost { background: transparent; color: var(--accent); }
+.actions { display: grid; gap: 10px; }
+.note { color: var(--muted); font-size: 0.9rem; }
+body[data-type="death"] .bubble { border-left: 4px solid var(--somber); }
+@media (max-width: 380px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1 id="tTitle"></h1>
+      <p class="sub" id="tSub"></p>
+    </div>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" id="langHi" aria-pressed="false">हिंदी</button>
+      <button type="button" id="langEn" aria-pressed="false">English</button>
+    </div>
+  </div>
+
+  <section>
+    <div class="step" id="tStep1"></div>
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <section>
+    <div class="step" id="tStep2"></div>
+    <form class="card" id="form" novalidate>
+      <div id="fields" style="display:grid;gap:14px"></div>
+      <div class="field">
+        <label for="f_extra"><span id="tExtra"></span> <span class="opt" id="tOpt1"></span></label>
+        <textarea id="f_extra"></textarea>
+      </div>
+      <div class="field">
+        <label for="f_sender"><span id="tSender"></span> <span class="opt" id="tOpt2"></span></label>
+        <input id="f_sender">
+      </div>
+    </form>
+  </section>
+
+  <section>
+    <div class="step" id="tStep3"></div>
+    <div class="card">
+      <div class="bubble" id="preview"></div>
+      <div class="err" id="errBox" hidden></div>
+      <div class="actions">
+        <a class="btn btn-primary" id="sendLink" href="https://wa.me/" target="_blank" rel="noopener"></a>
+        <button class="btn btn-ghost" type="button" id="copyBtn"></button>
+      </div>
+      <div class="note" id="note"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+// ---------------- SETTINGS ----------------
+// Leave empty: WhatsApp asks which chat/group to send to.
+// Put the admin's number (with country code, digits only, e.g. "919876543210")
+// if every message should go to the admin first for checking.
+var SEND_TO_NUMBER = "";
+
+// ---------------- TEXT (Hindi / English) ----------------
+var UI = {
+  hi: {
+    title: "समाज सूचना फॉर्म",
+    sub: "फॉर्म भरें और WhatsApp ग्रुप में भेजें",
+    step1: "1. सूचना का प्रकार चुनें",
+    step2: "2. जानकारी भरें",
+    step3: "3. देखें और भेजें",
+    extra: "अतिरिक्त संदेश",
+    sender: "भेजने वाले का नाम",
+    optional: "(वैकल्पिक)",
+    example: "उदाहरण: ",
+    send: "WhatsApp पर भेजें",
+    copy: "संदेश कॉपी करें",
+    copied: "संदेश कॉपी हो गया। WhatsApp में ग्रुप खोलकर पेस्ट करें।",
+    selectHint: "कॉपी नहीं हुआ — संदेश चुन लिया गया है, Ctrl+C दबाएं।",
+    noteGroup: "बटन दबाने पर WhatsApp खुलेगा। अपना समाज ग्रुप चुनें और Send दबाएं।",
+    noteAdmin: "बटन दबाने पर संदेश एडमिन के पास जाएगा। एडमिन जांच कर ग्रुप में डालेंगे।",
+    missing: "कृपया ये जानकारी भरें: ",
+    sharedBy: "- भेजने वाले: ",
+    contactLabel: "संपर्क"
+  },
+  en: {
+    title: "Samaj Announcement Form",
+    sub: "Fill the form and send it to the WhatsApp group",
+    step1: "1. Choose announcement type",
+    step2: "2. Fill the details",
+    step3: "3. Check and send",
+    extra: "Extra message",
+    sender: "Your name",
+    optional: "(optional)",
+    example: "Example: ",
+    send: "Send on WhatsApp",
+    copy: "Copy message",
+    copied: "Message copied. Open the group in WhatsApp and paste it.",
+    selectHint: "Could not copy — the message is selected, press Ctrl+C.",
+    noteGroup: "WhatsApp will open. Choose your samaj group and press Send.",
+    noteAdmin: "The message will go to the admin, who will check it and post it in the group.",
+    missing: "Please fill: ",
+    sharedBy: "- Shared by ",
+    contactLabel: "Contact"
+  }
+};
+
+// Each field: key, label (hi/en), example (hi/en), required, kind ("text", "date", "long", "tel")
+var TYPES = [
+  {
+    id: "marriage", icon: "💐",
+    name: { hi: "शादी", en: "Marriage" },
+    header: { hi: "💐 *शुभ विवाह* 💐", en: "💐 *Marriage Announcement* 💐" },
+    fields: [
+      { key: "groom", hi: "दूल्हे का नाम", en: "Groom name", exHi: "चि. राहुल", exEn: "Rahul", required: true, intro: true },
+      { key: "bride", hi: "दुल्हन का नाम", en: "Bride name", exHi: "सौ.कां. प्रिया", exEn: "Priya", required: true, intro: true },
+      { key: "groomFamily", hi: "दूल्हे का परिवार", en: "Groom's family", exHi: "श्री सुरेश पटेल के पुत्र", exEn: "S/o Shri Suresh Patel" },
+      { key: "brideFamily", hi: "दुल्हन का परिवार", en: "Bride's family", exHi: "श्री महेश शाह की पुत्री", exEn: "D/o Shri Mahesh Shah" },
+      { key: "date", hi: "तारीख", en: "Date", kind: "date", required: true },
+      { key: "venue", hi: "स्थान", en: "Venue", exHi: "समाज भवन, वडोदरा", exEn: "Samaj Bhavan, Vadodara" },
+      { key: "contact", hi: "संपर्क नंबर", en: "Contact number", kind: "tel", exHi: "98765 43210", exEn: "98765 43210" }
+    ]
+  },
+  {
+    id: "engagement", icon: "💍",
+    name: { hi: "सगाई", en: "Engagement" },
+    header: { hi: "💍 *सगाई समाचार* 💍", en: "💍 *Engagement Announcement* 💍" },
+    fields: [
+      { key: "groom", hi: "लड़के का नाम", en: "Boy's name", exHi: "चि. राहुल", exEn: "Rahul", required: true, intro: true },
+      { key: "bride", hi: "लड़की का नाम", en: "Girl's name", exHi: "सौ.कां. प्रिया", exEn: "Priya", required: true, intro: true },
+      { key: "families", hi: "परिवार", en: "Families", exHi: "पटेल परिवार एवं शाह परिवार", exEn: "Patel family and Shah family" },
+      { key: "date", hi: "तारीख", en: "Date", kind: "date", required: true },
+      { key: "venue", hi: "स्थान", en: "Venue", exHi: "समाज भवन", exEn: "Samaj Bhavan" }
+    ]
+  },
+  {
+    id: "death", icon: "🙏",
+    name: { hi: "शोक संदेश", en: "Shok Sandesh" },
+    header: { hi: "🙏 *शोक संदेश* 🙏", en: "🙏 *Shok Sandesh* 🙏" },
+    closing: { hi: "ॐ शांति 🙏", en: "Om Shanti 🙏" },
+    fields: [
+      { key: "deceased", hi: "स्वर्गीय का नाम", en: "Name of the deceased", exHi: "श्री रमेशभाई पटेल", exEn: "Shri Rameshbhai Patel", required: true, intro: true },
+      { key: "age", hi: "उम्र", en: "Age", exHi: "72", exEn: "72", intro: true },
+      { key: "family", hi: "परिवार", en: "Family", exHi: "श्री सुरेश पटेल के पिताजी", exEn: "Father of Shri Suresh Patel" },
+      { key: "date", hi: "देहांत की तारीख", en: "Date of passing", kind: "date", required: true },
+      { key: "prayer", hi: "उठामणा / बेसणा", en: "Uthamna / Besna (prayer meet)", kind: "long", exHi: "28-10-2026, शाम 4 से 6 बजे", exEn: "28-10-2026, 4 PM to 6 PM", required: true },
+      { key: "venue", hi: "स्थान", en: "Venue", exHi: "समाज भवन, वडोदरा", exEn: "Samaj Bhavan, Vadodara" },
+      { key: "contact", hi: "संपर्क नंबर", en: "Contact number", kind: "tel", exHi: "98765 43210", exEn: "98765 43210" }
+    ]
+  },
+  {
+    id: "birth", icon: "👶",
+    name: { hi: "शुभ समाचार", en: "Birth" },
+    header: { hi: "🎉 *शुभ समाचार* 🎉", en: "🎉 *Good News* 🎉" },
+    fields: [
+      { key: "parents", hi: "माता-पिता का नाम", en: "Parents' names", exHi: "श्री अमित एवं श्रीमती नेहा पटेल", exEn: "Amit and Neha Patel", required: true, intro: true },
+      { key: "baby", hi: "पुत्र / पुत्री", en: "Baby boy / baby girl", exHi: "पुत्र", exEn: "baby boy", intro: true },
+      { key: "date", hi: "तारीख", en: "Date", kind: "date" }
+    ]
+  },
+  {
+    id: "birthday", icon: "🎂",
+    name: { hi: "जन्मदिन", en: "Birthday" },
+    header: { hi: "🎂 *जन्मदिन की शुभकामनाएं* 🎂", en: "🎂 *Happy Birthday* 🎂" },
+    fields: [
+      { key: "person", hi: "किसका जन्मदिन", en: "Whose birthday", exHi: "श्री रमेशभाई पटेल", exEn: "Shri Rameshbhai Patel", required: true, intro: true },
+      { key: "date", hi: "तारीख", en: "Date", kind: "date" }
+    ]
+  },
+  {
+    id: "meeting", icon: "📢",
+    name: { hi: "मीटिंग", en: "Meeting" },
+    header: { hi: "📢 *मीटिंग सूचना* 📢", en: "📢 *Meeting Notice* 📢" },
+    fields: [
+      { key: "subject", hi: "विषय", en: "Subject", exHi: "वार्षिक सामान्य सभा", exEn: "Annual general meeting", required: true },
+      { key: "date", hi: "तारीख", en: "Date", kind: "date", required: true },
+      { key: "time", hi: "समय", en: "Time", exHi: "शाम 5 बजे", exEn: "5 PM" },
+      { key: "venue", hi: "स्थान", en: "Venue", exHi: "समाज भवन", exEn: "Samaj Bhavan", required: true },
+      { key: "agenda", hi: "मुख्य बातें", en: "Agenda", kind: "long", exHi: "हिसाब, नई कमेटी", exEn: "Accounts, new committee" }
+    ]
+  },
+  {
+    id: "blood", icon: "🩸",
+    name: { hi: "खून चाहिए", en: "Blood needed" },
+    header: { hi: "🩸 *अर्जेंट: खून की ज़रूरत* 🩸", en: "🩸 *URGENT: Blood Required* 🩸" },
+    fields: [
+      { key: "bloodGroup", hi: "ब्लड ग्रुप", en: "Blood group", exHi: "B+", exEn: "B+", required: true },
+      { key: "units", hi: "कितनी यूनिट", en: "Units", exHi: "2", exEn: "2" },
+      { key: "patient", hi: "मरीज़ का नाम", en: "Patient name", exHi: "श्री अमित पटेल", exEn: "Amit Patel" },
+      { key: "hospital", hi: "अस्पताल", en: "Hospital", exHi: "SSG अस्पताल, वडोदरा", exEn: "SSG Hospital, Vadodara", required: true },
+      { key: "contact", hi: "संपर्क नंबर", en: "Contact number", kind: "tel", exHi: "98765 43210", exEn: "98765 43210", required: true }
+    ]
+  },
+  {
+    id: "general", icon: "📝",
+    name: { hi: "अन्य सूचना", en: "Other news" },
+    header: { hi: "📢 *सूचना* 📢", en: "📢 *Announcement* 📢" },
+    fields: [
+      { key: "subject", hi: "विषय", en: "Subject", exHi: "समाज भवन की मरम्मत", exEn: "Samaj Bhavan repair work", required: true },
+      { key: "details", hi: "पूरी जानकारी", en: "Details", kind: "long", exHi: "रविवार को भवन बंद रहेगा", exEn: "The hall will be closed on Sunday", required: true }
+    ]
+  }
+];
+
+// ---------------- STATE ----------------
+var currentLang = "hi";
+var currentType = TYPES[0];
+var savedValues = {};
+
+try {
+  var storedLang = localStorage.getItem("samajLang");
+  if (storedLang === "hi" || storedLang === "en") { currentLang = storedLang; }
+} catch (e) {}
+
+function text(key) { return UI[currentLang][key]; }
+
+function formatDate(isoDate) {
+  if (!isoDate) { return ""; }
+  var parts = isoDate.split("-");
+  return parts[2] + "-" + parts[1] + "-" + parts[0];
+}
+
+function todayIso() {
+  var d = new Date();
+  var month = String(d.getMonth() + 1).padStart(2, "0");
+  var day = String(d.getDate()).padStart(2, "0");
+  return d.getFullYear() + "-" + month + "-" + day;
+}
+
+// ---------------- BUILD THE PAGE ----------------
+function drawStaticText() {
+  document.documentElement.lang = currentLang;
+  document.getElementById("tTitle").textContent = text("title");
+  document.getElementById("tSub").textContent = text("sub");
+  document.getElementById("tStep1").textContent = text("step1");
+  document.getElementById("tStep2").textContent = text("step2");
+  document.getElementById("tStep3").textContent = text("step3");
+  document.getElementById("tExtra").textContent = text("extra");
+  document.getElementById("tSender").textContent = text("sender");
+  document.getElementById("tOpt1").textContent = text("optional");
+  document.getElementById("tOpt2").textContent = text("optional");
+  document.getElementById("sendLink").textContent = text("send");
+  document.getElementById("copyBtn").textContent = text("copy");
+  document.getElementById("note").textContent = SEND_TO_NUMBER ? text("noteAdmin") : text("noteGroup");
+  document.getElementById("langHi").setAttribute("aria-pressed", currentLang === "hi" ? "true" : "false");
+  document.getElementById("langEn").setAttribute("aria-pressed", currentLang === "en" ? "true" : "false");
+}
+
+function drawTiles() {
+  var box = document.getElementById("tiles");
+  box.innerHTML = "";
+  TYPES.forEach(function (type) {
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "tile";
+    button.setAttribute("aria-pressed", type.id === currentType.id ? "true" : "false");
+    var icon = document.createElement("span");
+    icon.className = "ic";
+    icon.textContent = type.icon;
+    var label = document.createElement("span");
+    label.textContent = type.name[currentLang];
+    button.appendChild(icon);
+    button.appendChild(label);
+    button.addEventListener("click", function () { chooseType(type); });
+    box.appendChild(button);
+  });
+}
+
+function rememberValues() {
+  currentType.fields.forEach(function (field) {
+    var input = document.getElementById("f_" + field.key);
+    if (input) { savedValues[field.key] = input.value; }
+  });
+}
+
+function drawFields() {
+  var box = document.getElementById("fields");
+  box.innerHTML = "";
+  currentType.fields.forEach(function (field) {
+    var wrap = document.createElement("div");
+    wrap.className = "field";
+    wrap.id = "w_" + field.key;
+
+    var label = document.createElement("label");
+    label.setAttribute("for", "f_" + field.key);
+    label.textContent = field[currentLang] + " ";
+    var mark = document.createElement("span");
+    if (field.required) { mark.className = "req"; mark.textContent = "*"; }
+    else { mark.className = "opt"; mark.textContent = text("optional"); }
+    label.appendChild(mark);
+
+    var input;
+    if (field.kind === "long") {
+      input = document.createElement("textarea");
+    } else {
+      input = document.createElement("input");
+      if (field.kind === "date") { input.type = "date"; }
+      if (field.kind === "tel") { input.type = "tel"; input.inputMode = "tel"; }
+    }
+    input.id = "f_" + field.key;
+    var example = currentLang === "hi" ? field.exHi : field.exEn;
+    if (example) { input.placeholder = text("example") + example; }
+
+    if (savedValues[field.key] !== undefined) { input.value = savedValues[field.key]; }
+    else if (field.kind === "date") { input.value = todayIso(); }
+
+    input.addEventListener("input", updatePreview);
+    wrap.appendChild(label);
+    wrap.appendChild(input);
+    box.appendChild(wrap);
+  });
+  document.body.setAttribute("data-type", currentType.id);
+}
+
+function chooseType(type) {
+  rememberValues();
+  currentType = type;
+  drawTiles();
+  drawFields();
+  hideError();
+  updatePreview();
+}
+
+function changeLanguage(lang) {
+  rememberValues();
+  currentLang = lang;
+  try { localStorage.setItem("samajLang", lang); } catch (e) {}
+  drawStaticText();
+  drawTiles();
+  drawFields();
+  updatePreview();
+}
+
+// ---------------- MESSAGE ----------------
+function readValue(key) {
+  var input = document.getElementById("f_" + key);
+  if (!input) { return ""; }
+  return input.value.trim();
+}
+
+function introLine(type) {
+  var hi = currentLang === "hi";
+  if (type.id === "marriage" || type.id === "engagement") {
+    var groom = readValue("groom");
+    var bride = readValue("bride");
+    if (groom && bride) { return hi ? "*" + groom + "* संग *" + bride + "*" : "*" + groom + "* & *" + bride + "*"; }
+    return "";
+  }
+  if (type.id === "death") {
+    var name = readValue("deceased");
+    if (!name) { return ""; }
+    var age = readValue("age");
+    if (hi) {
+      return "अत्यंत दुःख के साथ सूचित किया जाता है कि *" + name + "*" + (age ? " (उम्र " + age + " वर्ष)" : "") + " का देहांत हो गया है।";
+    }
+    return "With deep sorrow we inform that *" + name + "*" + (age ? " (age " + age + ")" : "") + " has passed away.";
+  }
+  if (type.id === "birth") {
+    var parents = readValue("parents");
+    if (!parents) { return ""; }
+    var baby = readValue("baby");
+    if (hi) { return parents + " के घर " + (baby || "संतान") + " का जन्म हुआ है। हार्दिक बधाई!"; }
+    return parents + " are blessed with " + (baby || "a baby") + ". Congratulations!";
+  }
+  if (type.id === "birthday") {
+    var person = readValue("person");
+    if (!person) { return ""; }
+    return hi ? "*" + person + "* को जन्मदिन की हार्दिक शुभकामनाएं!" : "Wishing *" + person + "* a very happy birthday!";
+  }
+  return "";
+}
+
+function buildMessage() {
+  var lines = [];
+  lines.push(currentType.header[currentLang]);
+  lines.push("");
+
+  var intro = introLine(currentType);
+  if (intro) { lines.push(intro); lines.push(""); }
+
+  currentType.fields.forEach(function (field) {
+    if (field.intro) { return; }
+    var value = readValue(field.key);
+    if (!value) { return; }
+    if (field.kind === "date") { value = formatDate(value); }
+    if (field.kind === "long") {
+      lines.push("*" + field[currentLang] + ":*");
+      lines.push(value);
+    } else {
+      lines.push("*" + field[currentLang] + ":* " + value);
+    }
+  });
+
+  var extra = document.getElementById("f_extra").value.trim();
+  if (extra) { lines.push(""); lines.push(extra); }
+
+  if (currentType.closing) { lines.push(""); lines.push(currentType.closing[currentLang]); }
+
+  var sender = document.getElementById("f_sender").value.trim();
+  if (sender) { lines.push(""); lines.push(text("sharedBy") + sender); }
+
+  return lines.join("\n");
+}
+
+function whatsappLink(message) {
+  return "https://wa.me/" + SEND_TO_NUMBER + "?text=" + encodeURIComponent(message);
+}
+
+function updatePreview() {
+  var message = buildMessage();
+  document.getElementById("preview").textContent = message;
+  document.getElementById("sendLink").href = whatsappLink(message);
+}
+
+// ---------------- CHECKING ----------------
+function findMissingFields() {
+  var missing = [];
+  currentType.fields.forEach(function (field) {
+    var wrap = document.getElementById("w_" + field.key);
+    wrap.classList.remove("bad");
+    if (field.required && readValue(field.key) === "") {
+      missing.push(field[currentLang]);
+      wrap.classList.add("bad");
+    }
+  });
+  return missing;
+}
+
+function hideError() { document.getElementById("errBox").hidden = true; }
+
+document.getElementById("sendLink").addEventListener("click", function (event) {
+  var missing = findMissingFields();
+  if (missing.length > 0) {
+    event.preventDefault();
+    var box = document.getElementById("errBox");
+    box.textContent = text("missing") + missing.join(", ");
+    box.hidden = false;
+    var firstBad = document.querySelector(".field.bad input, .field.bad textarea");
+    if (firstBad) { firstBad.focus(); }
+    return;
+  }
+  hideError();
+});
+
+document.getElementById("copyBtn").addEventListener("click", function () {
+  var note = document.getElementById("note");
+  var message = buildMessage();
+  try {
+    navigator.clipboard.writeText(message).then(function () {
+      note.textContent = text("copied");
+    }, function () { selectPreview(); });
+  } catch (e) { selectPreview(); }
+});
+
+function selectPreview() {
+  var range = document.createRange();
+  range.selectNodeContents(document.getElementById("preview"));
+  var selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+  document.getElementById("note").textContent = text("selectHint");
+}
+
+document.getElementById("langHi").addEventListener("click", function () { changeLanguage("hi"); });
+document.getElementById("langEn").addEventListener("click", function () { changeLanguage("en"); });
+document.getElementById("f_extra").addEventListener("input", updatePreview);
+document.getElementById("f_sender").addEventListener("input", updatePreview);
+
+// ---------------- START ----------------
+// Example values so the first screen shows a real message. Clear and type your own.
+savedValues = {};
+drawStaticText();
+drawTiles();
+drawFields();
+updatePreview();
+</script>
+</body>
+</html>
