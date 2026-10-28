@@ -874,7 +874,7 @@ function buildDeathText(data) {
 // =====================================================================
 
 var CARD_W = 1080;
-var CARD_MIN_H = 1620;
+var CARD_MIN_H = 1200;
 var CENTER_X = CARD_W / 2;
 var COL = {
   ink: "#1f2937",
@@ -1046,7 +1046,9 @@ function drawBabyBreath(ctx, cx, cy, count, spread, seed) {
 }
 
 function drawDecorations(ctx, H) {
-  // Top-left: leaves, small white flowers and one lily.
+  // Top-left: leaves, small white flowers and one lily (drawn a little smaller).
+  ctx.save();
+  ctx.scale(0.78, 0.78);
   drawLeaf(ctx, 0, 380, 190, 40, -62, COL.leafDark);
   drawLeaf(ctx, 30, 300, 170, 36, -28, COL.leaf);
   drawLeaf(ctx, 150, 90, 190, 36, -8, COL.leaf);
@@ -1059,6 +1061,7 @@ function drawDecorations(ctx, H) {
   drawBabyBreath(ctx, 70, 440, 12, 45, 37);
   drawBabyBreath(ctx, 40, 120, 8, 35, 41);
   drawLily(ctx, 165, 190, 108);
+  ctx.restore();
 
   // Bottom-left: small white flowers and leaves.
   drawLeaf(ctx, 0, H - 90, 170, 34, -35, COL.leaf);
@@ -1107,56 +1110,33 @@ function drawStar(ctx, cx, cy, outer, inner) {
 }
 
 
-function drawArch(ctx, data) {
-  archPath(ctx, ARCH.x - 12, ARCH.y - 12, ARCH.w + 24, ARCH.h + 24);
-  ctx.strokeStyle = COL.gold;
-  ctx.lineWidth = 2.5;
-  ctx.stroke();
-
-  archPath(ctx, ARCH.x, ARCH.y, ARCH.w, ARCH.h);
-  ctx.fillStyle = COL.archFill;
-  ctx.fill();
-
-  // Crescent and star with "Rahimahullah".
-  var moonX = CENTER_X - 8;
-  var moonY = ARCH.y + 150;
-  ctx.fillStyle = COL.gold;
+// Top of the card: crescent and star, the dua in Arabic, and its reading.
+function drawTopBlessing(ctx) {
+  var moonX = CENTER_X - 6;
+  var moonY = 118;
+  ctx.save();
   ctx.beginPath();
-  ctx.arc(moonX, moonY, 50, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = COL.archFill;
+  ctx.arc(moonX, moonY, 36, 0, Math.PI * 2);
+  ctx.clip();
   ctx.beginPath();
-  ctx.arc(moonX + 22, moonY - 10, 44, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.rect(moonX - 40, moonY - 40, 80, 80);
+  ctx.arc(moonX + 16, moonY - 8, 31, 0, Math.PI * 2, true);
   ctx.fillStyle = COL.gold;
-  drawStar(ctx, moonX + 30, moonY - 6, 15, 6);
+  ctx.fill();
+  ctx.restore();
+  ctx.fillStyle = COL.gold;
+  drawStar(ctx, moonX + 22, moonY - 4, 11, 4.5);
 
   ctx.textAlign = "center";
   ctx.direction = "rtl";
-  setFont(ctx, "700", 38, FONT_ARABIC);
-  ctx.fillStyle = COL.goldDark;
-  ctx.fillText(data.female ? "رَحِمَهَا ٱللَّٰهُ" : "رَحِمَهُ ٱللَّٰهُ", CENTER_X, ARCH.y + 272);
-  ctx.direction = "ltr";
-  setFont(ctx, "400", 22, FONT_HINDI);
-  ctx.fillStyle = COL.muted;
-  ctx.fillText(data.female ? word("rahimaha") : word("rahimahu"), CENTER_X, ARCH.y + 312);
-}
-
-function drawDuaQuote(ctx) {
-  var cx = 878;
-  ctx.textAlign = "center";
-  ctx.direction = "rtl";
-  setFont(ctx, "400", 34, FONT_ARABIC);
+  setFont(ctx, "700", 42, FONT_ARABIC);
   ctx.fillStyle = COL.ink;
-  ctx.fillText("إِنَّا لِلَّٰهِ", cx, 150);
-  ctx.fillText("وَإِنَّا إِلَيْهِ", cx, 198);
-  ctx.fillText("رَاجِعُونَ", cx, 246);
+  ctx.fillText("إِنَّا لِلَّٰهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ", CENTER_X, 222);
   ctx.direction = "ltr";
-  setFont(ctx, "400", 20, FONT_HINDI);
+  setFont(ctx, "400", 24, FONT_HINDI);
   ctx.fillStyle = COL.muted;
-  ctx.fillText(word("duaLine1"), cx, 292);
-  ctx.fillText(word("duaLine2"), cx, 320);
-  drawDivider(ctx, cx, 352, 62);
+  ctx.fillText(word("duaFull"), CENTER_X, 268);
+  drawDivider(ctx, CENTER_X, 304, 120);
 }
 
 function detailsBoxFor(data) {
@@ -1195,10 +1175,9 @@ function cardParagraph(data) {
 function drawCard(ctx, data, H) {
   drawBackground(ctx, H);
   drawDecorations(ctx, H);
-  drawArch(ctx, data);
-  drawDuaQuote(ctx);
+  drawTopBlessing(ctx);
 
-  var y = ARCH.y + ARCH.h + 92;
+  var y = 388;
   drawHeading(ctx, word("title")[data.kind], y);
 
   // Name: shrink to fit, wrap only if still too long.
@@ -1434,6 +1413,11 @@ function downloadBlob(blob, fileName) {
   link.remove();
 }
 
+// Short caption sent with the card, e.g. "*⚫ खबर इंतक़ाल ⚫* — मरहूम अब्दुल करीम"
+function shortCaption(data) {
+  return "*⚫ " + word("title")[data.kind] + " ⚫* — " + marhoomWord(data) + " " + fullName(data);
+}
+
 function openWhatsApp(messageText) {
   window.open("https://wa.me/" + SEND_TO_NUMBER + "?text=" + encodeURIComponent(messageText), "_blank");
 }
@@ -1456,7 +1440,7 @@ function sendDeathNotice() {
   if (isPhone()) {
     var jpegBlob = dataUrlToBlob(canvas.toDataURL("image/jpeg", 0.93));
     var file = new File([jpegBlob], cardFileName(data, "jpg"), { type: "image/jpeg" });
-    var shareData = { files: [file], text: messageText };
+    var shareData = { files: [file], text: shortCaption(data) };
     if (navigator.canShare && navigator.canShare(shareData)) {
       navigator.share(shareData).then(function () {
         setDeathNote(dt("doneShared"));
@@ -1481,7 +1465,7 @@ function sendDeathNotice() {
     downloadBlob(pngBlob, cardFileName(data, "png"));
     setDeathNote(dt("doneComputerDownload"), true);
   }
-  openWhatsApp(messageText);
+  openWhatsApp(shortCaption(data));
 }
 
 function clearDeathForm() {
