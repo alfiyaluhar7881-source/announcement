@@ -5,10 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Samaj Announcement Form</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<meta property="og:title" content="समाज सूचना फॉर्म">
+<meta property="og:description" content="खबर इंतक़ाल, जियारत, फातेहा, शादी और मीटिंग की सूचना भेजें">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;800&family=Noto+Serif+Devanagari:wght@400;600;700&family=Amiri:wght@400;700&display=swap">
 <style>
-/* Layout: one phone-first column — language switch, type tiles, fields, preview, send */
+/* Layout: one phone-first column — language switch, type tiles, form sections, card preview, one send button */
 :root {
   --bg: #f2f4ef;
   --card: #ffffff;
@@ -17,41 +19,45 @@
   --line: #d4dcd6;
   --accent: #0f7a4a;
   --accent-ink: #ffffff;
-  --marigold: #c98a00;
+  --marigold: #a77b16;
   --tile-on: #fff6dd;
   --bubble: #dcf8c6;
   --bubble-ink: #1b2420;
   --error: #b3261e;
-  --somber: #4a5551;
   --font: "Mukta", "Nirmala UI", "Noto Sans Devanagari", system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #101513; --card: #19201d; --fg: #e6ece8; --muted: #9eaba4; --line: #2d3833;
     --accent: #2bb673; --accent-ink: #07140d; --marigold: #e8b23a; --tile-on: #2e2812;
-    --bubble: #1f4a33; --bubble-ink: #e6ece8; --error: #f2958c; --somber: #aab5b0;
+    --bubble: #1f4a33; --bubble-ink: #e6ece8; --error: #f2958c;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #101513; --card: #19201d; --fg: #e6ece8; --muted: #9eaba4; --line: #2d3833;
   --accent: #2bb673; --accent-ink: #07140d; --marigold: #e8b23a; --tile-on: #2e2812;
-  --bubble: #1f4a33; --bubble-ink: #e6ece8; --error: #f2958c; --somber: #aab5b0;
+  --bubble: #1f4a33; --bubble-ink: #e6ece8; --error: #f2958c;
   color-scheme: dark;
 }
+[hidden] { display: none !important; }
 body {
+  margin: 0;
   background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 17px; line-height: 1.45;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 20px 56px;
 }
-.wrap { max-width: 560px; margin: 0 auto; display: grid; gap: 18px; }
+.wrap { max-width: 600px; margin: 0 auto; display: grid; gap: 18px; }
+.stack { display: grid; gap: 18px; }
 .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
 h1 { font-size: 1.6rem; font-weight: 800; margin: 0; line-height: 1.15; text-wrap: balance; }
 .sub { color: var(--muted); margin: 4px 0 0; font-size: 0.95rem; }
-.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--card); }
-.lang button { font: inherit; font-size: 0.95rem; font-weight: 600; border: 0; background: transparent; color: var(--fg); padding: 6px 14px; cursor: pointer; }
-.lang button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.lang, .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--card); }
+.lang button, .seg button { font: inherit; font-size: 0.95rem; font-weight: 600; border: 0; background: transparent; color: var(--fg); padding: 6px 14px; cursor: pointer; }
+.lang button[aria-pressed="true"], .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.seg { display: grid; grid-template-columns: 1fr 1fr; }
+.seg button { padding: 10px 12px; }
 .step { font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--marigold); margin-bottom: 8px; }
 .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .tile {
@@ -61,36 +67,47 @@ h1 { font-size: 1.6rem; font-weight: 800; margin: 0; line-height: 1.15; text-wra
 }
 .tile .ic { font-size: 1.5rem; line-height: 1; }
 .tile[aria-pressed="true"] { border-color: var(--marigold); background: var(--tile-on); }
-.tile:focus-visible, .btn:focus-visible, .lang button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tile:focus-visible, .btn:focus-visible, .lang button:focus-visible, .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 14px; }
-.field { display: grid; gap: 5px; min-width: 0; }
+.card h2 { font-size: 1.05rem; font-weight: 800; margin: 0; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 480px) { .grid2 { grid-template-columns: 1fr; } }
+.field { display: grid; gap: 5px; min-width: 0; align-content: start; }
 .field label { font-weight: 600; }
 .req { color: var(--error); }
 .opt { color: var(--muted); font-weight: 400; font-size: 0.85rem; }
-input, textarea {
+input, textarea, select {
   font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line);
   border-radius: 10px; padding: 11px 12px; width: 100%; box-sizing: border-box; min-height: 48px;
 }
 textarea { min-height: 80px; resize: vertical; }
-input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
-.field.bad input, .field.bad textarea { border-color: var(--error); }
+input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+.field.bad input, .field.bad textarea, .field.bad select { border-color: var(--error); }
+.switch { display: flex; gap: 10px; align-items: center; font-weight: 600; cursor: pointer; }
+.switch input { width: 22px; height: 22px; min-height: 0; accent-color: var(--accent); }
 .err { color: var(--error); font-weight: 600; font-size: 0.92rem; }
 .bubble {
   background: var(--bubble); color: var(--bubble-ink); border-radius: 12px 12px 12px 3px;
   padding: 12px 14px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.98rem; min-height: 60px;
 }
 .btn {
-  font: inherit; font-weight: 800; font-size: 1.05rem; border-radius: 12px; padding: 14px 18px;
-  min-height: 52px; cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center;
-  border: 1.5px solid var(--accent);
+  font: inherit; font-weight: 800; font-size: 1.1rem; border-radius: 12px; padding: 14px 18px;
+  min-height: 56px; cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--accent); text-align: center; width: 100%; box-sizing: border-box;
 }
 .btn-primary { background: var(--accent); color: var(--accent-ink); }
 .btn-ghost { background: transparent; color: var(--accent); }
+.btn-small { min-height: 40px; padding: 8px 14px; font-size: 0.95rem; width: auto; }
 .actions { display: grid; gap: 10px; }
-.note { color: var(--muted); font-size: 0.9rem; }
-body[data-type="death"] .bubble { border-left: 4px solid var(--somber); }
+.note { color: var(--muted); font-size: 0.9rem; white-space: pre-line; }
+.note.guide { background: var(--tile-on); border: 1.5px solid var(--marigold); border-radius: 12px; padding: 14px 16px; color: var(--fg); font-size: 1.05rem; font-weight: 600; line-height: 1.6; }
+.example-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: var(--tile-on); border: 1px solid var(--marigold); border-radius: 12px; padding: 10px 14px; font-weight: 600; }
+.card-preview { display: grid; justify-items: center; }
+.card-preview canvas { width: 100%; max-width: 440px; height: auto; border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,0.18); }
+details summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+details .bubble { margin-top: 10px; }
 @media (max-width: 380px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
-@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 </style>
 </head>
 <body>
@@ -112,43 +129,1683 @@ body[data-type="death"] .bubble { border-left: 4px solid var(--somber); }
     <div class="tiles" id="tiles"></div>
   </section>
 
-  <section>
-    <div class="step" id="tStep2"></div>
-    <form class="card" id="form" novalidate>
-      <div id="fields" style="display:grid;gap:14px"></div>
-      <div class="field">
-        <label for="f_extra"><span id="tExtra"></span> <span class="opt" id="tOpt1"></span></label>
-        <textarea id="f_extra"></textarea>
-      </div>
-      <div class="field">
-        <label for="f_sender"><span id="tSender"></span> <span class="opt" id="tOpt2"></span></label>
-        <input id="f_sender">
-      </div>
-    </form>
-  </section>
-
-  <section>
-    <div class="step" id="tStep3"></div>
-    <div class="card">
-      <div class="bubble" id="preview"></div>
-      <div class="err" id="errBox" hidden></div>
-      <div class="actions">
-        <a class="btn btn-primary" id="sendLink" href="https://wa.me/" target="_blank" rel="noopener"></a>
-        <button class="btn btn-ghost" type="button" id="copyBtn"></button>
-      </div>
-      <div class="note" id="note"></div>
+  <!-- ===================== KHABAR INTEQAL (death news) ===================== -->
+  <div id="deathSection" class="stack">
+    <div class="example-bar" id="exampleBar" hidden>
+      <span data-t="exampleNote"></span>
+      <button class="btn btn-ghost btn-small" type="button" id="clearDeath" data-t="clearAll"></button>
     </div>
-  </section>
+
+    <div class="card">
+      <h2 data-t="secType"></h2>
+      <div class="field">
+        <label for="d_kind"><span data-t="kindLabel"></span> <span class="req">*</span></label>
+        <select id="d_kind"></select>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 data-t="secPerson"></h2>
+      <div class="grid2">
+        <div class="field">
+          <label for="d_gender"><span data-t="genderLabel"></span> <span class="req">*</span></label>
+          <select id="d_gender"></select>
+        </div>
+        <div class="field">
+          <label for="d_age"><span data-t="ageLabel"></span> <span class="opt" data-t="optional"></span></label>
+          <input id="d_age" type="number" inputmode="numeric" min="0" max="130" data-ph="agePh">
+        </div>
+      </div>
+      <div class="field" id="w_name">
+        <label for="d_name"><span data-t="nameLabel"></span> <span class="req">*</span></label>
+        <input id="d_name" data-ph="namePh">
+      </div>
+      <div class="field">
+        <label for="d_urf"><span data-t="urfLabel"></span> <span class="opt" data-t="optional"></span></label>
+        <input id="d_urf" data-ph="urfPh">
+      </div>
+      <div class="field" id="g_family">
+        <label for="d_family"><span data-t="familyLabel"></span> <span class="opt" data-t="optional"></span></label>
+        <input id="d_family" data-ph="familyPh">
+      </div>
+      <div class="field" id="g_cause">
+        <label for="d_cause" data-t="causeLabel"></label>
+        <select id="d_cause"></select>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 data-t="secPlace"></h2>
+      <div class="grid2">
+        <div class="field" id="w_city">
+          <label for="d_city"><span data-t="cityLabel"></span> <span class="req">*</span></label>
+          <input id="d_city" data-ph="cityPh">
+        </div>
+        <div class="field">
+          <label for="d_state" data-t="stateLabel"></label>
+          <select id="d_state"></select>
+        </div>
+      </div>
+      <div class="field" id="w_date">
+        <label for="d_date"><span data-t="dateLabel"></span> <span class="req">*</span> <span class="opt" id="d_dayShow"></span></label>
+        <input id="d_date" type="date">
+      </div>
+      <div class="field">
+        <label for="d_address"><span data-t="addressLabel"></span> <span class="opt" data-t="optional"></span></label>
+        <input id="d_address" data-ph="addressPh">
+      </div>
+    </div>
+
+    <div class="card" id="sec_tadfin">
+      <h2 data-t="secTadfin"></h2>
+      <div class="grid2">
+        <div class="field" id="w_tadfinDate">
+          <label for="d_tadfinDate"><span data-t="dateLabel"></span> <span class="req">*</span></label>
+          <input id="d_tadfinDate" type="date">
+        </div>
+        <div class="field">
+          <label for="d_tadfinWhen" data-t="whenLabel"></label>
+          <select id="d_tadfinWhen" class="when-select"></select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="d_tadfinTime"><span data-t="timeLabel"></span> <span class="opt" data-t="optional"></span></label>
+        <input id="d_tadfinTime" type="time">
+      </div>
+      <div class="field">
+        <label for="d_janaza" data-t="janazaLabel"></label>
+        <input id="d_janaza" data-ph="janazaPh">
+      </div>
+      <div class="field">
+        <label for="d_qabristan" data-t="qabristanLabel"></label>
+        <input id="d_qabristan" data-ph="qabristanPh">
+      </div>
+    </div>
+
+    <div class="card" id="sec_ziyarat">
+      <label class="switch" id="sw_ziyarat"><input type="checkbox" id="d_addZiyarat"> <span data-t="addZiyarat"></span></label>
+      <h2 id="h_ziyarat" data-t="secZiyarat" hidden></h2>
+      <div id="body_ziyarat" class="stack" style="gap:14px">
+        <div class="grid2">
+          <div class="field" id="w_ziyaratDate">
+            <label for="d_ziyaratDate" data-t="dateLabel"></label>
+            <input id="d_ziyaratDate" type="date">
+          </div>
+          <div class="field">
+            <label for="d_ziyaratWhen" data-t="whenLabel"></label>
+            <select id="d_ziyaratWhen" class="when-select"></select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="d_ziyaratTime"><span data-t="timeLabel"></span> <span class="opt" data-t="optional"></span></label>
+          <input id="d_ziyaratTime" type="time">
+        </div>
+        <div class="field">
+          <label for="d_ziyaratPlace" data-t="placeLabel"></label>
+          <input id="d_ziyaratPlace" data-ph="ziyaratPlacePh">
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="sec_fateha">
+      <label class="switch" id="sw_fateha"><input type="checkbox" id="d_addFateha"> <span data-t="addFateha"></span></label>
+      <h2 id="h_fateha" data-t="secFateha" hidden></h2>
+      <div id="body_fateha" class="stack" style="gap:14px">
+        <div class="grid2">
+          <div class="field" id="w_fatehaDate">
+            <label for="d_fatehaDate" data-t="dateLabel"></label>
+            <input id="d_fatehaDate" type="date">
+          </div>
+          <div class="field">
+            <label for="d_fatehaWhen" data-t="whenLabel"></label>
+            <select id="d_fatehaWhen" class="when-select"></select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="d_fatehaTime"><span data-t="timeLabel"></span> <span class="opt" data-t="optional"></span></label>
+          <input id="d_fatehaTime" type="time">
+        </div>
+        <div class="field">
+          <label for="d_fatehaPlace" data-t="placeLabel"></label>
+          <input id="d_fatehaPlace" data-ph="fatehaPlacePh">
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="sec_more">
+      <h2><span data-t="secMore"></span> <span class="opt" data-t="optional"></span></h2>
+      <div class="field">
+        <label for="d_jawai" data-t="jawaiLabel"></label>
+        <input id="d_jawai" data-ph="jawaiPh">
+      </div>
+      <div class="field">
+        <label for="d_pihar" data-t="piharLabel"></label>
+        <input id="d_pihar" data-ph="piharPh">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 data-t="secBy"></h2>
+      <div class="field">
+        <label for="d_by"><span data-t="byLabel"></span> <span class="opt" data-t="byHint"></span></label>
+        <textarea id="d_by" data-ph="byPh"></textarea>
+      </div>
+      <div class="field">
+        <label for="d_group"><span data-t="groupLabel"></span> <span class="opt" data-t="optional"></span></label>
+        <input id="d_group">
+      </div>
+    </div>
+
+    <section>
+      <div class="step" data-t="stepSend"></div>
+      <div class="card">
+        <div class="field">
+          <span style="font-weight:600" data-t="sendModeLabel"></span>
+          <div class="seg" role="group">
+            <button type="button" id="modeCard" aria-pressed="true" data-t="modeCard"></button>
+            <button type="button" id="modeText" aria-pressed="false" data-t="modeText"></button>
+          </div>
+        </div>
+        <div class="card-preview" id="cardPreview"><canvas id="cardCanvas" width="1080" height="1620" aria-label="Card preview"></canvas></div>
+        <details id="textDetails">
+          <summary data-t="viewText"></summary>
+          <div class="bubble" id="deathText"></div>
+        </details>
+        <div class="err" id="deathErr" hidden></div>
+        <button class="btn btn-primary" type="button" id="sendDeath" data-t="sendBtn"></button>
+        <div class="note" id="deathNote"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===================== OTHER ANNOUNCEMENTS ===================== -->
+  <div id="genericSection" class="stack" hidden>
+    <section>
+      <div class="step" id="tStep2"></div>
+      <form class="card" id="form" novalidate>
+        <div id="fields" class="stack" style="gap:14px"></div>
+        <div class="field">
+          <label for="f_extra"><span id="tExtra"></span> <span class="opt" id="tOpt1"></span></label>
+          <textarea id="f_extra"></textarea>
+        </div>
+        <div class="field">
+          <label for="f_sender"><span id="tSender"></span> <span class="opt" id="tOpt2"></span></label>
+          <input id="f_sender">
+        </div>
+      </form>
+    </section>
+    <section>
+      <div class="step" id="tStep3"></div>
+      <div class="card">
+        <div class="bubble" id="preview"></div>
+        <div class="err" id="errBox" hidden></div>
+        <a class="btn btn-primary" id="sendLink" href="https://wa.me/" target="_blank" rel="noopener"></a>
+        <button class="btn btn-ghost" type="button" id="copyBtn" hidden></button>
+        <div class="note" id="note"></div>
+      </div>
+    </section>
+  </div>
 </div>
 
 <script>
-// ---------------- SETTINGS ----------------
+// =====================================================================
+// SETTINGS
+// =====================================================================
+
 // Leave empty: WhatsApp asks which chat/group to send to.
-// Put the admin's number (with country code, digits only, e.g. "919876543210")
+// Put the admin's number (country code + number, digits only, e.g. "919876543210")
 // if every message should go to the admin first for checking.
 var SEND_TO_NUMBER = "";
 
-// ---------------- TEXT (Hindi / English) ----------------
+// Group name printed at the bottom of every card and message.
+var DEFAULT_GROUP_LINE = "1/ऑल इंडिया जयपुरी लोहार जमात ग्रुप";
+
+// true = show an example announcement when the page opens.
+var FILL_EXAMPLE = false;
+
+// =====================================================================
+// COMMON HELPERS
+// =====================================================================
+
+var currentLang = "hi";
+
+var DAY_NAMES = {
+  hi: ["इतवार", "सोमवार", "मंगलवार", "बुधवार", "जुमेरात", "जुम्मा", "शनिवार"],
+  en: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+};
+
+function getById(id) {
+  return document.getElementById(id);
+}
+
+function readInput(id) {
+  var element = getById(id);
+  if (!element) { return ""; }
+  return element.value.trim();
+}
+
+function isoFromDate(d) {
+  var month = String(d.getMonth() + 1).padStart(2, "0");
+  var day = String(d.getDate()).padStart(2, "0");
+  return d.getFullYear() + "-" + month + "-" + day;
+}
+
+function todayIso() {
+  return isoFromDate(new Date());
+}
+
+function addDaysIso(isoDate, days) {
+  var parts = isoDate.split("-");
+  return isoFromDate(new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]) + days));
+}
+
+// "2026-10-27" -> "27/10/2026"
+function formatDateSlash(isoDate) {
+  if (!isoDate) { return ""; }
+  var parts = isoDate.split("-");
+  return parts[2] + "/" + parts[1] + "/" + parts[0];
+}
+
+// "2026-10-27" -> "मंगलवार" / "Tuesday"
+function dayNameOf(isoDate) {
+  if (!isoDate) { return ""; }
+  var parts = isoDate.split("-");
+  var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  return DAY_NAMES[currentLang][d.getDay()];
+}
+
+// "2026-10-27" -> "27/10/2026, मंगलवार"
+function dateWithDay(isoDate) {
+  if (!isoDate) { return ""; }
+  return formatDateSlash(isoDate) + ", " + dayNameOf(isoDate);
+}
+
+// "16:00" -> "शाम 4:00 बजे" / "4:00 PM"
+function timeInWords(timeValue) {
+  if (!timeValue) { return ""; }
+  var parts = timeValue.split(":");
+  var hour = Number(parts[0]);
+  var minute = parts[1];
+  var hour12 = hour % 12;
+  if (hour12 === 0) { hour12 = 12; }
+  if (currentLang === "en") {
+    return hour12 + ":" + minute + (hour < 12 ? " AM" : " PM");
+  }
+  var period = "रात";
+  if (hour >= 4 && hour < 12) { period = "सुबह"; }
+  else if (hour >= 12 && hour < 16) { period = "दोपहर"; }
+  else if (hour >= 16 && hour < 19) { period = "शाम"; }
+  return period + " " + hour12 + ":" + minute + " बजे";
+}
+
+function joinFilled(parts, separator) {
+  var filled = [];
+  for (var i = 0; i < parts.length; i++) {
+    if (parts[i]) { filled.push(parts[i]); }
+  }
+  return filled.join(separator);
+}
+
+function copyText(text, onDone, onFail) {
+  try {
+    navigator.clipboard.writeText(text).then(onDone, onFail);
+  } catch (e) {
+    onFail();
+  }
+}
+
+function isPhone() {
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+// =====================================================================
+// KHABAR INTEQAL — form text in Hindi and English
+// =====================================================================
+
+var DT = {
+  hi: {
+    exampleNote: "यह उदाहरण है। अपनी जानकारी भरने के लिए साफ़ करें।",
+    clearAll: "सब साफ़ करें",
+    secType: "सूचना का प्रकार",
+    kindLabel: "क्या भेजना है?",
+    secPerson: "मरहूम / मरहूमा की जानकारी",
+    genderLabel: "मर्द / औरत",
+    ageLabel: "उम्र",
+    agePh: "उदाहरण: 85",
+    nameLabel: "नाम",
+    namePh: "उदाहरण: कमालुद्दीन दितावत",
+    urfLabel: "उर्फ़ (घर का नाम)",
+    urfPh: "उदाहरण: मल्ला भाई",
+    familyLabel: "रिश्ता और खानदान",
+    familyPh: "उदाहरण: मरहूम जमालुद्दीन मारोठ के दितावत, छावनी वालों के लड़के",
+    causeLabel: "इंतक़ाल कैसे हुआ",
+    secPlace: "जगह और तारीख",
+    cityLabel: "शहर",
+    cityPh: "उदाहरण: इंदौर",
+    stateLabel: "राज्य",
+    dateLabel: "तारीख",
+    addressLabel: "पता",
+    addressPh: "उदाहरण: हेड पोस्ट ऑफिस के सामने, तलोद",
+    secTadfin: "तदफ़ीन",
+    whenLabel: "कब",
+    timeLabel: "समय",
+    janazaLabel: "नमाज़े जनाज़ा — मस्जिद",
+    janazaPh: "उदाहरण: छावनी मस्जिद",
+    qabristanLabel: "क़ब्रस्तान",
+    qabristanPh: "उदाहरण: लुनिया पुरा क़ब्रस्तान",
+    addZiyarat: "जियारत की जानकारी भी जोड़ें",
+    secZiyarat: "जियारत",
+    placeLabel: "जगह",
+    ziyaratPlacePh: "उदाहरण: तलोद जुम्मा मस्जिद / घर पर",
+    addFateha: "फातेहा की जानकारी भी जोड़ें",
+    secFateha: "फातेहा",
+    fatehaPlacePh: "उदाहरण: घर पर",
+    secMore: "और जानकारी",
+    jawaiLabel: "जवाई",
+    jawaiPh: "उदाहरण: सामोद के तगाले, खंडवा",
+    piharLabel: "पीहर",
+    piharPh: "उदाहरण: अहमदाबाद, सरखेज — भरतपुर के पवार",
+    secBy: "बाय (सूचना देने वाले)",
+    byLabel: "नाम और नंबर",
+    byHint: "(हर नाम नई लाइन में)",
+    byPh: "हाजी मोहम्मद हुसैन - 98XXX XXXXX\nरऊफ़ भाई - 76XXX XXXXX",
+    groupLabel: "ग्रुप का नाम",
+    optional: "(वैकल्पिक)",
+    stepSend: "देखें और भेजें",
+    sendModeLabel: "क्या भेजना है?",
+    modeCard: "कार्ड (फ़ोटो)",
+    modeText: "सिर्फ़ मैसेज",
+    viewText: "लिखा हुआ मैसेज देखें",
+    sendBtn: "WhatsApp पर भेजें",
+    missing: "कृपया ये जानकारी भरें: ",
+    missName: "नाम", missCity: "शहर", missDate: "तारीख",
+    missTadfin: "तदफ़ीन की तारीख", missZiyarat: "जियारत की तारीख", missFateha: "फातेहा की तारीख",
+    helpPhoneCard: "बटन दबाएं → WhatsApp चुनें → अपना ग्रुप चुनें → Send.",
+    helpComputerCard: "बटन दबाने पर कार्ड कॉपी होगा और WhatsApp खुलेगा। ग्रुप चुनें → Ctrl+V दबाएं → Send.",
+    helpText: "बटन दबाने पर WhatsApp खुलेगा। ग्रुप चुनें → Send.",
+    doneComputer: "✅ कार्ड कॉपी हो गया! अब WhatsApp में:\n1. अपना ग्रुप चुनें\n2. मैसेज वाले बॉक्स में क्लिक करके Ctrl+V दबाएं — कार्ड आ जाएगा\n3. Send दबाएं",
+    doneComputerDownload: "कार्ड डाउनलोड हो गया। WhatsApp में ग्रुप चुनें, 📎 से कार्ड लगाएं और Send करें।",
+    doneShared: "WhatsApp में ग्रुप में पहुँचा या नहीं, एक बार देख लें।",
+    shareFailed: "WhatsApp नहीं खुल सका। दोबारा कोशिश करें।"
+  },
+  en: {
+    exampleNote: "This is an example. Clear it to enter your own details.",
+    clearAll: "Clear all",
+    secType: "Type of notice",
+    kindLabel: "What do you want to send?",
+    secPerson: "Details of the deceased",
+    genderLabel: "Male / Female",
+    ageLabel: "Age",
+    agePh: "Example: 85",
+    nameLabel: "Name",
+    namePh: "Example: Kamaluddin Ditawat",
+    urfLabel: "Alias (home name)",
+    urfPh: "Example: Malla Bhai",
+    familyLabel: "Relation and family",
+    familyPh: "Example: son of Marhoom Jamaluddin Maroth Ditawat, Chhawni",
+    causeLabel: "Cause of passing",
+    secPlace: "Place and date",
+    cityLabel: "City",
+    cityPh: "Example: Indore",
+    stateLabel: "State",
+    dateLabel: "Date",
+    addressLabel: "Address",
+    addressPh: "Example: Opposite Head Post Office, Talod",
+    secTadfin: "Tadfeen (burial)",
+    whenLabel: "When",
+    timeLabel: "Time",
+    janazaLabel: "Namaz-e-Janaza — masjid",
+    janazaPh: "Example: Chhawni Masjid",
+    qabristanLabel: "Qabristan",
+    qabristanPh: "Example: Luniya Pura Qabristan",
+    addZiyarat: "Also add Ziyarat details",
+    secZiyarat: "Ziyarat",
+    placeLabel: "Place",
+    ziyaratPlacePh: "Example: Talod Jumma Masjid / at home",
+    addFateha: "Also add Fateha details",
+    secFateha: "Fateha",
+    fatehaPlacePh: "Example: at home",
+    secMore: "More details",
+    jawaiLabel: "Jawai",
+    jawaiPh: "Example: Tagale of Samod, Khandwa",
+    piharLabel: "Pihar (maternal family)",
+    piharPh: "Example: Sarkhej, Ahmedabad — Pawar of Bharatpur",
+    secBy: "By (who is informing)",
+    byLabel: "Names and numbers",
+    byHint: "(one name per line)",
+    byPh: "Haji Mohammad Hussain - 98XXX XXXXX\nRauf Bhai - 76XXX XXXXX",
+    groupLabel: "Group name",
+    optional: "(optional)",
+    stepSend: "Check and send",
+    sendModeLabel: "What do you want to send?",
+    modeCard: "Card (image)",
+    modeText: "Message only",
+    viewText: "View the written message",
+    sendBtn: "Send on WhatsApp",
+    missing: "Please fill: ",
+    missName: "Name", missCity: "City", missDate: "Date",
+    missTadfin: "Tadfeen date", missZiyarat: "Ziyarat date", missFateha: "Fateha date",
+    helpPhoneCard: "Press the button → choose WhatsApp → choose your group → Send.",
+    helpComputerCard: "The card will be copied and WhatsApp will open. Choose the group → press Ctrl+V → Send.",
+    helpText: "WhatsApp will open. Choose the group → Send.",
+    doneComputer: "✅ Card copied! Now in WhatsApp:\n1. Choose your group\n2. Click in the message box and press Ctrl+V — the card will appear\n3. Press Send",
+    doneComputerDownload: "Card downloaded. In WhatsApp choose the group, attach the card with 📎 and Send.",
+    doneShared: "Please check once that it reached the group in WhatsApp.",
+    shareFailed: "WhatsApp could not be opened. Please try again."
+  }
+};
+
+function dt(key) {
+  return DT[currentLang][key];
+}
+
+// Dropdown choices: value -> text in both languages
+var KIND_OPTIONS = [
+  ["inteqal", "खबर इंतक़ाल (तदफ़ीन के साथ)", "Death news (with burial details)"],
+  ["ziyarat", "सिर्फ़ जियारत की सूचना", "Ziyarat notice only"],
+  ["fateha", "सिर्फ़ फातेहा की सूचना", "Fateha notice only"]
+];
+var GENDER_OPTIONS = [
+  ["male", "मर्द (मरहूम)", "Male (Marhoom)"],
+  ["female", "औरत (मरहूमा)", "Female (Marhooma)"]
+];
+var CAUSE_OPTIONS = [
+  ["qaza", "क़ज़ाए इलाही से", "by the will of Allah"],
+  ["bimari", "बीमारी के चलते", "after an illness"],
+  ["heart", "हार्ट अटैक से", "due to a heart attack"],
+  ["hadsa", "हादसे में", "in an accident"],
+  ["none", "— न लिखें —", "— do not mention —"]
+];
+var STATE_OPTIONS = [
+  ["gujarat", "गुजरात", "Gujarat"],
+  ["rajasthan", "राजस्थान", "Rajasthan"],
+  ["mp", "मध्य प्रदेश", "Madhya Pradesh"],
+  ["maharashtra", "महाराष्ट्र", "Maharashtra"],
+  ["up", "उत्तर प्रदेश", "Uttar Pradesh"],
+  ["delhi", "दिल्ली", "Delhi"],
+  ["karnataka", "कर्नाटक", "Karnataka"],
+  ["telangana", "तेलंगाना", "Telangana"],
+  ["", "— न लिखें —", "— do not mention —"]
+];
+var WHEN_OPTIONS = [
+  ["", "— चुनें —", "— choose —"],
+  ["fajr", "फ़ज्र बाद", "after Fajr"],
+  ["zohar", "नमाज़े ज़ोहर बाद", "after Zohar namaz"],
+  ["asr", "असर बाद", "after Asr"],
+  ["maghrib", "मग़रिब बाद", "after Maghrib"],
+  ["isha", "इशा बाद", "after Isha"],
+  ["jumma", "जुम्मा बाद", "after Jumma"],
+  ["afterTadfin", "तदफ़ीन के बाद", "after Tadfeen"],
+  ["afterZiyarat", "जियारत के बाद", "after Ziyarat"]
+];
+
+// Text of the chosen option in the current language ("" for the empty choice).
+function optionText(options, value) {
+  if (value === "" || value === "none") { return ""; }
+  for (var i = 0; i < options.length; i++) {
+    if (options[i][0] === value) {
+      return currentLang === "en" ? options[i][2] : options[i][1];
+    }
+  }
+  return "";
+}
+
+function fillSelect(select, options) {
+  var keepValue = select.value;
+  select.innerHTML = "";
+  for (var i = 0; i < options.length; i++) {
+    var option = document.createElement("option");
+    option.value = options[i][0];
+    option.textContent = currentLang === "en" ? options[i][2] : options[i][1];
+    select.appendChild(option);
+  }
+  if (keepValue !== "") { select.value = keepValue; }
+}
+
+function applyDeathLanguage() {
+  var labelled = document.querySelectorAll("#deathSection [data-t]");
+  for (var i = 0; i < labelled.length; i++) {
+    labelled[i].textContent = dt(labelled[i].getAttribute("data-t"));
+  }
+  var withPlaceholder = document.querySelectorAll("#deathSection [data-ph]");
+  for (var k = 0; k < withPlaceholder.length; k++) {
+    withPlaceholder[k].placeholder = dt(withPlaceholder[k].getAttribute("data-ph"));
+  }
+  fillSelect(getById("d_kind"), KIND_OPTIONS);
+  fillSelect(getById("d_gender"), GENDER_OPTIONS);
+  fillSelect(getById("d_cause"), CAUSE_OPTIONS);
+  fillSelect(getById("d_state"), STATE_OPTIONS);
+  var whenSelects = document.querySelectorAll(".when-select");
+  for (var w = 0; w < whenSelects.length; w++) {
+    fillSelect(whenSelects[w], WHEN_OPTIONS);
+  }
+  showSendHelp();
+}
+
+// =====================================================================
+// KHABAR INTEQAL — reading the form and building the sentences
+// =====================================================================
+
+function readDeathData() {
+  var byLines = [];
+  var rawBy = readInput("d_by").split("\n");
+  for (var i = 0; i < rawBy.length; i++) {
+    if (rawBy[i].trim() !== "") { byLines.push(rawBy[i].trim()); }
+  }
+  return {
+    kind: readInput("d_kind") || "inteqal",
+    female: readInput("d_gender") === "female",
+    name: readInput("d_name"),
+    urf: readInput("d_urf"),
+    age: readInput("d_age"),
+    family: readInput("d_family"),
+    cause: optionText(CAUSE_OPTIONS, readInput("d_cause")),
+    city: readInput("d_city"),
+    state: optionText(STATE_OPTIONS, readInput("d_state")),
+    date: readInput("d_date"),
+    address: readInput("d_address"),
+    tadfinDate: readInput("d_tadfinDate"),
+    tadfinWhen: optionText(WHEN_OPTIONS, readInput("d_tadfinWhen")),
+    tadfinTime: readInput("d_tadfinTime"),
+    janaza: readInput("d_janaza"),
+    qabristan: readInput("d_qabristan"),
+    addZiyarat: getById("d_addZiyarat").checked,
+    ziyaratDate: readInput("d_ziyaratDate"),
+    ziyaratWhen: optionText(WHEN_OPTIONS, readInput("d_ziyaratWhen")),
+    ziyaratTime: readInput("d_ziyaratTime"),
+    ziyaratPlace: readInput("d_ziyaratPlace"),
+    addFateha: getById("d_addFateha").checked,
+    fatehaDate: readInput("d_fatehaDate"),
+    fatehaWhen: optionText(WHEN_OPTIONS, readInput("d_fatehaWhen")),
+    fatehaTime: readInput("d_fatehaTime"),
+    fatehaPlace: readInput("d_fatehaPlace"),
+    jawai: readInput("d_jawai"),
+    pihar: readInput("d_pihar"),
+    by: byLines,
+    groupLine: readInput("d_group")
+  };
+}
+
+// Words used on the card and in the message
+var WORDS = {
+  hi: {
+    title: { inteqal: "खबर इंतक़ाल", ziyarat: "जियारत", fateha: "फातेहा" },
+    marhoom: "मरहूम", marhooma: "मरहूमा",
+    urf: "उर्फ़", age: "उम्र", years: "साल",
+    tadfin: "तदफ़ीन", ziyarat: "जियारत", fateha: "फातेहा", jawai: "जवाई", pihar: "पीहर", by: "बाय",
+    colDate: "तारीख", colTime: "वक़्त", colJanaza: "नमाज़े जनाज़ा", colPlace: "जगह",
+    address: "पता", janaza: "नमाज़े जनाज़ा",
+    duaLine1: "इन्ना लिल्लाहि व इन्ना", duaLine2: "इलैहि राजिऊन",
+    duaFull: "इन्ना लिल्लाहि व इन्ना इलैहि राजिऊन",
+    rahimahu: "रहिमहुल्लाह", rahimaha: "रहिमहल्लाह"
+  },
+  en: {
+    title: { inteqal: "Khabar-e-Inteqal", ziyarat: "Ziyarat", fateha: "Fateha" },
+    marhoom: "Marhoom", marhooma: "Marhooma",
+    urf: "alias", age: "Age", years: "years",
+    tadfin: "Tadfeen (Burial)", ziyarat: "Ziyarat", fateha: "Fateha", jawai: "Jawai", pihar: "Pihar", by: "By",
+    colDate: "Date", colTime: "Time", colJanaza: "Namaz-e-Janaza", colPlace: "Place",
+    address: "Address", janaza: "Namaz-e-Janaza",
+    duaLine1: "Inna Lillahi wa Inna", duaLine2: "Ilayhi Raji'oon",
+    duaFull: "Inna Lillahi wa Inna Ilayhi Raji'oon",
+    rahimahu: "Rahimahullah", rahimaha: "Rahimahallah"
+  }
+};
+
+function word(key) {
+  return WORDS[currentLang][key];
+}
+
+function marhoomWord(data) {
+  return data.female ? word("marhooma") : word("marhoom");
+}
+
+function fullName(data) {
+  var name = data.name || "—";
+  if (data.urf) { name = name + " " + word("urf") + " " + data.urf; }
+  return name;
+}
+
+function ageText(data) {
+  if (!data.age) { return ""; }
+  return word("age") + " " + data.age + " " + word("years");
+}
+
+function qabristanText(data) {
+  if (!data.qabristan) { return ""; }
+  if (currentLang === "en") { return "Burial at " + data.qabristan + "."; }
+  return data.qabristan + " में सुपुर्दे ख़ाक किया जाएगा।";
+}
+
+function closingText(data) {
+  if (currentLang === "en") {
+    return "May Allah grant the " + marhoomWord(data) + " Maghfirah. Ameen.";
+  }
+  return "अल्लाह तआला " + marhoomWord(data) + " की मग़फ़िरत फ़रमाए। आमीन।";
+}
+
+// Main line, e.g. "मरहूम जमालुद्दीन ... के लड़के कमालुद्दीन उर्फ़ मल्ला भाई उम्र 85 साल का क़ज़ाए इलाही से इंतक़ाल हो गया है।"
+function inteqalSentence(data, boldName) {
+  var namePart = fullName(data);
+  if (boldName) { namePart = "*" + namePart + "*"; }
+  if (currentLang === "en") {
+    var subject = joinFilled([namePart, data.family, data.age ? "aged " + data.age : ""], ", ");
+    return joinFilled([subject, "has passed away", data.cause], " ") + ".";
+  }
+  return joinFilled([data.family, namePart, ageText(data), "का", data.cause, "इंतक़ाल हो गया है।"], " ");
+}
+
+function eventTiming(dateIso, when, time) {
+  return joinFilled([dateWithDay(dateIso), joinFilled([when, timeInWords(time)], ", ")], " — ");
+}
+
+function eventName(kind) {
+  return kind === "ziyarat" ? word("ziyarat") : word("fateha");
+}
+
+function eventSentence(data, kind, boldName) {
+  var isZiyarat = kind === "ziyarat";
+  var dateIso = isZiyarat ? data.ziyaratDate : data.fatehaDate;
+  var when = joinFilled([isZiyarat ? data.ziyaratWhen : data.fatehaWhen, timeInWords(isZiyarat ? data.ziyaratTime : data.fatehaTime)], ", ");
+  var place = isZiyarat ? data.ziyaratPlace : data.fatehaPlace;
+  var namePart = fullName(data);
+  if (boldName) { namePart = "*" + namePart + "*"; }
+  if (currentLang === "en") {
+    return joinFilled(["The " + eventName(kind) + " of " + marhoomWord(data) + " " + namePart + " will be held", dateWithDay(dateIso) ? "on " + dateWithDay(dateIso) : "", when, place ? "at " + place : ""], ", ") + ". In sha Allah.";
+  }
+  return joinFilled([marhoomWord(data), namePart, "की", eventName(kind), dateWithDay(dateIso), when, place ? place + " में" : "", "होगी। इन शा अल्लाह।"], " ");
+}
+
+function cityLine(data) {
+  return joinFilled([data.city, data.state], ", ");
+}
+
+// ---------------- WhatsApp text in the samaj style ----------------
+function buildDeathText(data) {
+  var lines = [];
+  lines.push("⚫⚫⚫⚫⚫⚫⚫");
+  lines.push("*⚫ " + word("title")[data.kind] + " ⚫*");
+  lines.push("_*إِنَّا لِلَّٰهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ*_");
+  lines.push("_*" + word("duaFull") + "*_");
+  lines.push("");
+  if (cityLine(data)) { lines.push("*" + cityLine(data) + "*"); }
+  if (data.date) { lines.push(dateWithDay(data.date)); }
+  if (data.address) { lines.push("*" + word("address") + ":* " + data.address); }
+  lines.push("");
+
+  if (data.kind === "inteqal") {
+    lines.push(inteqalSentence(data, true));
+    lines.push("");
+    lines.push("*⚫ " + word("tadfin") + " ⚫*");
+    lines.push(eventTiming(data.tadfinDate, data.tadfinWhen, data.tadfinTime));
+    if (data.janaza) { lines.push("*" + word("janaza") + ":* " + data.janaza); }
+    if (data.qabristan) { lines.push(qabristanText(data)); }
+    if (data.addZiyarat) {
+      lines.push("");
+      lines.push("*⚫ " + word("ziyarat") + " ⚫*");
+      lines.push(joinFilled([eventTiming(data.ziyaratDate, data.ziyaratWhen, data.ziyaratTime), data.ziyaratPlace], " — "));
+    }
+    if (data.addFateha) {
+      lines.push("");
+      lines.push("*⚫ " + word("fateha") + " ⚫*");
+      lines.push(joinFilled([eventTiming(data.fatehaDate, data.fatehaWhen, data.fatehaTime), data.fatehaPlace], " — "));
+    }
+    if (data.jawai) { lines.push(""); lines.push("*⚫ " + word("jawai") + " ⚫*"); lines.push(data.jawai); }
+    if (data.pihar) { lines.push(""); lines.push("*⚫ " + word("pihar") + " ⚫*"); lines.push(data.pihar); }
+  } else {
+    lines.push(eventSentence(data, data.kind, true));
+  }
+
+  if (data.by.length > 0) {
+    lines.push("");
+    lines.push("*⚫ " + word("by") + " ⚫*");
+    for (var i = 0; i < data.by.length; i++) { lines.push(data.by[i]); }
+  }
+  if (data.groupLine) {
+    lines.push("➖➖➖➖➖➖➖");
+    lines.push("_" + data.groupLine + "_");
+    lines.push("➖➖➖➖➖➖➖");
+  }
+  return lines.join("\n");
+}
+
+// =====================================================================
+// KHABAR INTEQAL — card drawing (canvas)
+// =====================================================================
+
+var CARD_W = 1080;
+var CARD_MIN_H = 1620;
+var CENTER_X = CARD_W / 2;
+var COL = {
+  ink: "#1f2937",
+  muted: "#5f5a50",
+  gold: "#b08d4f",
+  goldDark: "#8a6a32",
+  goldSoft: "#d8c296",
+  archFill: "#ebe6dd",
+  leaf: "#7c9a68",
+  leafDark: "#56764a",
+  boxFill: "rgba(222, 202, 160, 0.26)"
+};
+var FONT_HINDI = '"Noto Serif Devanagari", "Nirmala UI", "Mangal", serif';
+var FONT_ARABIC = '"Amiri", "Traditional Arabic", "Arial", serif';
+var ARCH = { x: CENTER_X - 150, y: 96, w: 300, h: 370 };
+
+function setFont(ctx, weight, size, family) {
+  ctx.font = weight + " " + size + "px " + family;
+}
+
+function wrapText(ctx, text, maxWidth) {
+  var words = text.split(" ");
+  var lines = [];
+  var line = "";
+  for (var i = 0; i < words.length; i++) {
+    var test = line === "" ? words[i] : line + " " + words[i];
+    if (ctx.measureText(test).width > maxWidth && line !== "") {
+      lines.push(line);
+      line = words[i];
+    } else {
+      line = test;
+    }
+  }
+  if (line !== "") { lines.push(line); }
+  return lines;
+}
+
+function drawWrappedCentered(ctx, text, centerX, y, maxWidth, lineHeight) {
+  var lines = wrapText(ctx, text, maxWidth);
+  ctx.textAlign = "center";
+  for (var i = 0; i < lines.length; i++) {
+    ctx.fillText(lines[i], centerX, y);
+    y = y + lineHeight;
+  }
+  return y;
+}
+
+function roundRectPath(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function archPath(ctx, x, y, w, h) {
+  var r = w / 2;
+  ctx.beginPath();
+  ctx.moveTo(x, y + r);
+  ctx.arc(x + r, y + r, r, Math.PI, 0);
+  ctx.lineTo(x + w, y + h - 28);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - 28, y + h);
+  ctx.lineTo(x + 28, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - 28);
+  ctx.closePath();
+}
+
+// Small repeatable random numbers so the flowers look the same on every redraw.
+function makeRandom(seed) {
+  var value = seed;
+  return function () {
+    value = (value * 9301 + 49297) % 233280;
+    return value / 233280;
+  };
+}
+
+function drawLeaf(ctx, x, y, length, width, angleDeg, color) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angleDeg * Math.PI / 180);
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.quadraticCurveTo(length * 0.45, -width, length, 0);
+  ctx.quadraticCurveTo(length * 0.45, width, 0, 0);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255,0.35)";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(4, 0);
+  ctx.lineTo(length * 0.88, 0);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawLily(ctx, cx, cy, size) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.shadowColor = "rgba(80, 70, 50, 0.18)";
+  ctx.shadowBlur = 14;
+  for (var i = 0; i < 6; i++) {
+    var r = (i % 2 === 0) ? size : size * 0.86;
+    ctx.save();
+    ctx.rotate((i * 60 + 18) * Math.PI / 180);
+    var gradient = ctx.createLinearGradient(0, 0, r, 0);
+    gradient.addColorStop(0, "#f4efe2");
+    gradient.addColorStop(0.5, "#ffffff");
+    gradient.addColorStop(1, "#fbf8f1");
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.bezierCurveTo(r * 0.3, -r * 0.3, r * 0.8, -r * 0.24, r, 0);
+    ctx.bezierCurveTo(r * 0.8, r * 0.24, r * 0.3, r * 0.3, 0, 0);
+    ctx.fillStyle = gradient;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = "rgba(160, 150, 125, 0.35)";
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.restore();
+  }
+  ctx.shadowBlur = 0;
+  for (var k = 0; k < 6; k++) {
+    var angle = (k * 60 + 45) * Math.PI / 180;
+    var ex = Math.cos(angle) * size * 0.42;
+    var ey = Math.sin(angle) * size * 0.42;
+    ctx.strokeStyle = "#a8b98a";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(ex, ey);
+    ctx.stroke();
+    ctx.fillStyle = "#9a5b2e";
+    ctx.beginPath();
+    ctx.ellipse(ex, ey, 6, 3.5, angle, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawBabyBreath(ctx, cx, cy, count, spread, seed) {
+  var random = makeRandom(seed);
+  for (var i = 0; i < count; i++) {
+    var px = cx + (random() - 0.5) * spread * 2;
+    var py = cy + (random() - 0.5) * spread * 2;
+    ctx.strokeStyle = "rgba(124, 154, 104, 0.6)";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + spread * 0.6);
+    ctx.quadraticCurveTo((cx + px) / 2, py + 10, px, py);
+    ctx.stroke();
+    for (var p = 0; p < 5; p++) {
+      var a = p * 72 * Math.PI / 180;
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(px + Math.cos(a) * 3.6, py + Math.sin(a) * 3.6, 3.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = "#e8dfc8";
+    ctx.beginPath();
+    ctx.arc(px, py, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawDecorations(ctx, H) {
+  // Top-left: leaves, small white flowers and one lily.
+  drawLeaf(ctx, 0, 380, 190, 40, -62, COL.leafDark);
+  drawLeaf(ctx, 30, 300, 170, 36, -28, COL.leaf);
+  drawLeaf(ctx, 150, 90, 190, 36, -8, COL.leaf);
+  drawLeaf(ctx, 120, 40, 160, 32, -30, COL.leafDark);
+  drawLeaf(ctx, 230, 210, 150, 30, 24, COL.leaf);
+  drawLeaf(ctx, 90, 280, 140, 30, 48, COL.leafDark);
+  drawLeaf(ctx, 0, 470, 150, 32, -80, COL.leaf);
+  drawBabyBreath(ctx, 330, 90, 16, 55, 11);
+  drawBabyBreath(ctx, 290, 250, 10, 40, 23);
+  drawBabyBreath(ctx, 70, 440, 12, 45, 37);
+  drawBabyBreath(ctx, 40, 120, 8, 35, 41);
+  drawLily(ctx, 165, 190, 108);
+
+  // Bottom-left: small white flowers and leaves.
+  drawLeaf(ctx, 0, H - 90, 170, 34, -35, COL.leaf);
+  drawLeaf(ctx, 40, H - 40, 160, 30, -10, COL.leafDark);
+  drawBabyBreath(ctx, 120, H - 130, 18, 60, 53);
+  drawBabyBreath(ctx, 60, H - 210, 10, 40, 67);
+
+  // Bottom-right: golden leaves.
+  var goldLeaf = "rgba(176, 141, 79, 0.75)";
+  drawLeaf(ctx, CARD_W - 50, H - 50, 190, 30, -125, goldLeaf);
+  drawLeaf(ctx, CARD_W - 45, H - 60, 170, 26, -100, goldLeaf);
+  drawLeaf(ctx, CARD_W - 60, H - 45, 160, 26, -150, goldLeaf);
+  drawLeaf(ctx, CARD_W - 44, H - 70, 130, 22, -84, "rgba(176, 141, 79, 0.55)");
+}
+
+function drawBackground(ctx, H) {
+  var gradient = ctx.createLinearGradient(0, 0, 0, H);
+  gradient.addColorStop(0, "#fbf8f1");
+  gradient.addColorStop(1, "#f1e9db");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, CARD_W, H);
+
+  var glow = ctx.createRadialGradient(CENTER_X, H * 0.42, 40, CENTER_X, H * 0.42, CARD_W * 0.8);
+  glow.addColorStop(0, "rgba(255,255,255,0.65)");
+  glow.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, CARD_W, H);
+
+  roundRectPath(ctx, 34, 34, CARD_W - 68, H - 68, 28);
+  ctx.strokeStyle = COL.gold;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function drawStar(ctx, cx, cy, outer, inner) {
+  ctx.beginPath();
+  for (var i = 0; i < 10; i++) {
+    var r = (i % 2 === 0) ? outer : inner;
+    var a = (i * 36 - 90) * Math.PI / 180;
+    var px = cx + Math.cos(a) * r;
+    var py = cy + Math.sin(a) * r;
+    if (i === 0) { ctx.moveTo(px, py); } else { ctx.lineTo(px, py); }
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+
+
+function drawArch(ctx, data) {
+  archPath(ctx, ARCH.x - 12, ARCH.y - 12, ARCH.w + 24, ARCH.h + 24);
+  ctx.strokeStyle = COL.gold;
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  archPath(ctx, ARCH.x, ARCH.y, ARCH.w, ARCH.h);
+  ctx.fillStyle = COL.archFill;
+  ctx.fill();
+
+  // Crescent and star with "Rahimahullah".
+  var moonX = CENTER_X - 8;
+  var moonY = ARCH.y + 150;
+  ctx.fillStyle = COL.gold;
+  ctx.beginPath();
+  ctx.arc(moonX, moonY, 50, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = COL.archFill;
+  ctx.beginPath();
+  ctx.arc(moonX + 22, moonY - 10, 44, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = COL.gold;
+  drawStar(ctx, moonX + 30, moonY - 6, 15, 6);
+
+  ctx.textAlign = "center";
+  ctx.direction = "rtl";
+  setFont(ctx, "700", 38, FONT_ARABIC);
+  ctx.fillStyle = COL.goldDark;
+  ctx.fillText(data.female ? "رَحِمَهَا ٱللَّٰهُ" : "رَحِمَهُ ٱللَّٰهُ", CENTER_X, ARCH.y + 272);
+  ctx.direction = "ltr";
+  setFont(ctx, "400", 22, FONT_HINDI);
+  ctx.fillStyle = COL.muted;
+  ctx.fillText(data.female ? word("rahimaha") : word("rahimahu"), CENTER_X, ARCH.y + 312);
+}
+
+function drawDuaQuote(ctx) {
+  var cx = 878;
+  ctx.textAlign = "center";
+  ctx.direction = "rtl";
+  setFont(ctx, "400", 34, FONT_ARABIC);
+  ctx.fillStyle = COL.ink;
+  ctx.fillText("إِنَّا لِلَّٰهِ", cx, 150);
+  ctx.fillText("وَإِنَّا إِلَيْهِ", cx, 198);
+  ctx.fillText("رَاجِعُونَ", cx, 246);
+  ctx.direction = "ltr";
+  setFont(ctx, "400", 20, FONT_HINDI);
+  ctx.fillStyle = COL.muted;
+  ctx.fillText(word("duaLine1"), cx, 292);
+  ctx.fillText(word("duaLine2"), cx, 320);
+  drawDivider(ctx, cx, 352, 62);
+}
+
+function detailsBoxFor(data) {
+  if (data.kind === "inteqal") {
+    return {
+      title: word("tadfin"),
+      columns: [
+        { icon: "calendar", label: word("colDate"), value: dateWithDay(data.tadfinDate) },
+        { icon: "clock", label: word("colTime"), value: joinFilled([data.tadfinWhen, timeInWords(data.tadfinTime)], ", ") },
+        { icon: "mosque", label: word("colJanaza"), value: data.janaza }
+      ],
+      bottom: qabristanText(data)
+    };
+  }
+  var isZiyarat = data.kind === "ziyarat";
+  return {
+    title: eventName(data.kind),
+    columns: [
+      { icon: "calendar", label: word("colDate"), value: dateWithDay(isZiyarat ? data.ziyaratDate : data.fatehaDate) },
+      { icon: "clock", label: word("colTime"), value: isZiyarat ? joinFilled([data.ziyaratWhen, timeInWords(data.ziyaratTime)], ", ") : joinFilled([data.fatehaWhen, timeInWords(data.fatehaTime)], ", ") },
+      { icon: "pin", label: word("colPlace"), value: isZiyarat ? data.ziyaratPlace : data.fatehaPlace }
+    ],
+    bottom: ""
+  };
+}
+
+function cardParagraph(data) {
+  if (data.kind === "inteqal") { return inteqalSentence(data, false); }
+  if (currentLang === "en") {
+    return "The " + eventName(data.kind) + " of " + marhoomWord(data) + " " + fullName(data) + " will be held, In sha Allah. Everyone is requested to attend.";
+  }
+  return marhoomWord(data) + " " + fullName(data) + " की " + eventName(data.kind) + " होगी। इन शा अल्लाह। आप सब से शिरकत की गुज़ारिश है।";
+}
+
+// Draws the whole card and returns the y position where the content ends.
+function drawCard(ctx, data, H) {
+  drawBackground(ctx, H);
+  drawDecorations(ctx, H);
+  drawArch(ctx, data);
+  drawDuaQuote(ctx);
+
+  var y = ARCH.y + ARCH.h + 92;
+  drawHeading(ctx, word("title")[data.kind], y);
+
+  // Name: shrink to fit, wrap only if still too long.
+  y = y + 100;
+  var nameText = data.name || "—";
+  var nameSize = 76;
+  setFont(ctx, "700", nameSize, FONT_HINDI);
+  while (ctx.measureText(nameText).width > 860 && nameSize > 50) {
+    nameSize = nameSize - 2;
+    setFont(ctx, "700", nameSize, FONT_HINDI);
+  }
+  ctx.fillStyle = COL.ink;
+  y = drawWrappedCentered(ctx, nameText, CENTER_X, y, 860, nameSize + 14) - (nameSize + 14);
+
+  if (data.urf) {
+    y = y + 54;
+    setFont(ctx, "400", 30, FONT_HINDI);
+    ctx.fillStyle = COL.muted;
+    ctx.textAlign = "center";
+    ctx.fillText("(" + word("urf") + " " + data.urf + ")", CENTER_X, y);
+  }
+
+  y = y + 44;
+  drawDivider(ctx, CENTER_X, y, 120);
+
+  if (data.age) {
+    y = y + 54;
+    setFont(ctx, "400", 30, FONT_HINDI);
+    ctx.fillStyle = COL.muted;
+    ctx.textAlign = "center";
+    ctx.fillText(ageText(data), CENTER_X, y);
+  }
+
+  var placeDate = joinFilled([dateWithDay(data.date), cityLine(data)], "  ·  ");
+  if (placeDate) {
+    y = y + 54;
+    setFont(ctx, "400", 29, FONT_HINDI);
+    ctx.fillStyle = COL.ink;
+    ctx.textAlign = "center";
+    var halfWidth = ctx.measureText(placeDate).width / 2;
+    if (halfWidth < 400) {
+      ctx.fillText(placeDate, CENTER_X + 22, y);
+      drawCalendarIcon(ctx, CENTER_X - halfWidth - 14, y - 10, 30);
+    } else {
+      y = drawWrappedCentered(ctx, placeDate, CENTER_X, y, 840, 42) - 42;
+    }
+  }
+
+  y = y + 66;
+  setFont(ctx, "400", 31, FONT_HINDI);
+  ctx.fillStyle = COL.ink;
+  y = drawWrappedCentered(ctx, cardParagraph(data), CENTER_X, y, 840, 50);
+
+  if (data.address) {
+    setFont(ctx, "400", 26, FONT_HINDI);
+    ctx.fillStyle = COL.muted;
+    y = drawWrappedCentered(ctx, word("address") + ": " + data.address, CENTER_X, y + 2, 820, 40);
+  }
+
+  y = drawDetailsBox(ctx, detailsBoxFor(data), y + 14);
+
+  var extras = [];
+  if (data.kind === "inteqal") {
+    if (data.addZiyarat) { extras.push([word("ziyarat"), joinFilled([eventTiming(data.ziyaratDate, data.ziyaratWhen, data.ziyaratTime), data.ziyaratPlace], " — ")]); }
+    if (data.addFateha) { extras.push([word("fateha"), joinFilled([eventTiming(data.fatehaDate, data.fatehaWhen, data.fatehaTime), data.fatehaPlace], " — ")]); }
+    if (data.jawai) { extras.push([word("jawai"), data.jawai]); }
+    if (data.pihar) { extras.push([word("pihar"), data.pihar]); }
+  }
+  if (extras.length > 0) {
+    y = y + 56;
+    for (var i = 0; i < extras.length; i++) {
+      y = drawLabelValue(ctx, extras[i][0], extras[i][1] || "—", y);
+    }
+    y = y - 44;
+  }
+
+  y = y + 70;
+  setFont(ctx, "400", 30, FONT_HINDI);
+  ctx.fillStyle = COL.ink;
+  y = drawWrappedCentered(ctx, closingText(data), CENTER_X, y, 840, 44) - 44;
+
+  y = y + 40;
+  drawDivider(ctx, CENTER_X, y, 110);
+
+  if (data.by.length > 0) {
+    y = y + 48;
+    setFont(ctx, "600", 25, FONT_HINDI);
+    ctx.fillStyle = COL.goldDark;
+    ctx.textAlign = "center";
+    ctx.fillText(word("by"), CENTER_X, y);
+    setFont(ctx, "400", 26, FONT_HINDI);
+    ctx.fillStyle = COL.muted;
+    y = y + 6;
+    for (var b = 0; b < data.by.length; b++) {
+      y = drawWrappedCentered(ctx, data.by[b], CENTER_X, y + 38, 760, 38) - 38;
+    }
+  }
+
+  if (data.groupLine) {
+    y = y + 52;
+    setFont(ctx, "400", 22, FONT_HINDI);
+    ctx.fillStyle = COL.muted;
+    y = drawWrappedCentered(ctx, data.groupLine, CENTER_X, y, 720, 32) - 32;
+  }
+  return y;
+}
+
+var measureCanvas = document.createElement("canvas");
+measureCanvas.width = CARD_W;
+measureCanvas.height = 3400;
+
+function renderCard() {
+  var data = readDeathData();
+  var bottom = drawCard(measureCanvas.getContext("2d"), data, 3400);
+  var height = Math.max(CARD_MIN_H, Math.ceil(bottom + 150));
+  var canvas = getById("cardCanvas");
+  if (canvas.height !== height) { canvas.height = height; }
+  drawCard(canvas.getContext("2d"), data, height);
+}
+
+// =====================================================================
+// KHABAR INTEQAL — page behaviour
+// =====================================================================
+
+var sendMode = "card";
+var renderPending = false;
+
+function updateDeath() {
+  var data = readDeathData();
+  getById("deathText").textContent = buildDeathText(data);
+  getById("d_dayShow").textContent = data.date ? "(" + dayNameOf(data.date) + ")" : "";
+  if (sendMode === "card" && !renderPending) {
+    renderPending = true;
+    requestAnimationFrame(function () {
+      renderPending = false;
+      renderCard();
+    });
+  }
+}
+
+// Show / hide sections depending on the notice type.
+function applyDeathKind() {
+  var kind = readInput("d_kind") || "inteqal";
+  var isInteqal = kind === "inteqal";
+  getById("sec_tadfin").hidden = !isInteqal;
+  getById("sec_more").hidden = !isInteqal;
+  getById("g_family").hidden = !isInteqal;
+  getById("g_cause").hidden = !isInteqal;
+
+  getById("sec_ziyarat").hidden = !(isInteqal || kind === "ziyarat");
+  getById("sw_ziyarat").hidden = !isInteqal;
+  getById("h_ziyarat").hidden = isInteqal;
+  getById("body_ziyarat").hidden = isInteqal && !getById("d_addZiyarat").checked;
+
+  getById("sec_fateha").hidden = !(isInteqal || kind === "fateha");
+  getById("sw_fateha").hidden = !isInteqal;
+  getById("h_fateha").hidden = isInteqal;
+  getById("body_fateha").hidden = isInteqal && !getById("d_addFateha").checked;
+  updateDeath();
+}
+
+function showSendHelp() {
+  if (sendMode === "text") { setDeathNote(dt("helpText")); return; }
+  setDeathNote(isPhone() ? dt("helpPhoneCard") : dt("helpComputerCard"));
+}
+
+function setSendMode(mode) {
+  sendMode = mode;
+  getById("modeCard").setAttribute("aria-pressed", mode === "card" ? "true" : "false");
+  getById("modeText").setAttribute("aria-pressed", mode === "text" ? "true" : "false");
+  getById("cardPreview").hidden = mode !== "card";
+  getById("textDetails").open = mode === "text";
+  showSendHelp();
+  updateDeath();
+}
+
+function findDeathMissing(data) {
+  var missing = [];
+  var marks = ["w_name", "w_city", "w_date", "w_tadfinDate", "w_ziyaratDate", "w_fatehaDate"];
+  for (var i = 0; i < marks.length; i++) { getById(marks[i]).classList.remove("bad"); }
+  if (!data.name) { missing.push(dt("missName")); getById("w_name").classList.add("bad"); }
+  if (!data.city) { missing.push(dt("missCity")); getById("w_city").classList.add("bad"); }
+  if (!data.date) { missing.push(dt("missDate")); getById("w_date").classList.add("bad"); }
+  if (data.kind === "inteqal" && !data.tadfinDate) { missing.push(dt("missTadfin")); getById("w_tadfinDate").classList.add("bad"); }
+  if (data.kind === "ziyarat" && !data.ziyaratDate) { missing.push(dt("missZiyarat")); getById("w_ziyaratDate").classList.add("bad"); }
+  if (data.kind === "fateha" && !data.fatehaDate) { missing.push(dt("missFateha")); getById("w_fatehaDate").classList.add("bad"); }
+  return missing;
+}
+
+function checkDeathForm() {
+  var data = readDeathData();
+  var missing = findDeathMissing(data);
+  var box = getById("deathErr");
+  if (missing.length > 0) {
+    box.textContent = dt("missing") + missing.join(", ");
+    box.hidden = false;
+    var firstBad = document.querySelector("#deathSection .field.bad input");
+    if (firstBad) { firstBad.focus(); }
+    return null;
+  }
+  box.hidden = true;
+  return data;
+}
+
+function setDeathNote(text, highlight) {
+  var note = getById("deathNote");
+  note.textContent = text;
+  if (highlight) { note.classList.add("guide"); } else { note.classList.remove("guide"); }
+}
+
+function cardFileName(data, extension) {
+  var kindWord = { inteqal: "khabar-inteqal", ziyarat: "ziyarat", fateha: "fateha" };
+  return kindWord[data.kind] + "-" + (data.date || todayIso()) + "." + extension;
+}
+
+// Turns the canvas picture into a file right away (no waiting),
+// so the phone still allows opening the share menu.
+function dataUrlToBlob(dataUrl) {
+  var parts = dataUrl.split(",");
+  var mimeType = parts[0].split(":")[1].split(";")[0];
+  var binary = atob(parts[1]);
+  var bytes = new Uint8Array(binary.length);
+  for (var i = 0; i < binary.length; i++) { bytes[i] = binary.charCodeAt(i); }
+  return new Blob([bytes], { type: mimeType });
+}
+
+function downloadBlob(blob, fileName) {
+  var link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
+function openWhatsApp(messageText) {
+  window.open("https://wa.me/" + SEND_TO_NUMBER + "?text=" + encodeURIComponent(messageText), "_blank");
+}
+
+function sendDeathNotice() {
+  var data = checkDeathForm();
+  if (!data) { return; }
+  var messageText = buildDeathText(data);
+
+  if (sendMode === "text") {
+    openWhatsApp(messageText);
+    setDeathNote(dt("helpText"));
+    return;
+  }
+
+  renderCard();
+  var canvas = getById("cardCanvas");
+
+  // Phone: share menu with the card picture and the message as caption.
+  if (isPhone()) {
+    var jpegBlob = dataUrlToBlob(canvas.toDataURL("image/jpeg", 0.93));
+    var file = new File([jpegBlob], cardFileName(data, "jpg"), { type: "image/jpeg" });
+    var shareData = { files: [file], text: messageText };
+    if (navigator.canShare && navigator.canShare(shareData)) {
+      navigator.share(shareData).then(function () {
+        setDeathNote(dt("doneShared"));
+      }, function (error) {
+        if (error && error.name === "AbortError") { return; }
+        setDeathNote(dt("shareFailed"));
+      });
+      return;
+    }
+  }
+
+  // Computer: copy the card, then open WhatsApp with the message typed.
+  var pngBlob = dataUrlToBlob(canvas.toDataURL("image/png"));
+  try {
+    navigator.clipboard.write([new ClipboardItem({ "image/png": pngBlob })]).then(function () {
+      setDeathNote(dt("doneComputer"), true);
+    }, function () {
+      downloadBlob(pngBlob, cardFileName(data, "png"));
+      setDeathNote(dt("doneComputerDownload"), true);
+    });
+  } catch (e) {
+    downloadBlob(pngBlob, cardFileName(data, "png"));
+    setDeathNote(dt("doneComputerDownload"), true);
+  }
+  openWhatsApp(messageText);
+}
+
+function clearDeathForm() {
+  var inputs = document.querySelectorAll("#deathSection input, #deathSection textarea");
+  for (var i = 0; i < inputs.length; i++) {
+    if (inputs[i].type === "checkbox") { continue; }
+    inputs[i].value = "";
+  }
+  getById("d_addZiyarat").checked = false;
+  getById("d_addFateha").checked = false;
+  getById("d_cause").value = "qaza";
+  getById("d_tadfinWhen").value = "";
+  getById("d_ziyaratWhen").value = "";
+  getById("d_fatehaWhen").value = "";
+  getById("d_date").value = todayIso();
+  getById("d_tadfinDate").value = todayIso();
+  getById("d_group").value = DEFAULT_GROUP_LINE;
+  getById("exampleBar").hidden = true;
+  applyDeathKind();
+}
+
+var EXAMPLE_TEXT = {
+  hi: {
+    name: "अब्दुल करीम", urf: "करीम भाई",
+    family: "मरहूम हाजी रहीम बख़्श जयपुर के खोखर, छावनी वालों के लड़के",
+    city: "इंदौर", address: "छावनी, जामा मस्जिद के पास",
+    janaza: "छावनी मस्जिद", qabristan: "लुनिया पुरा क़ब्रस्तान",
+    ziyaratPlace: "घर पर", jawai: "खंडवा", by: "हाजी मोहम्मद हुसैन - 90000 00000"
+  },
+  en: {
+    name: "Abdul Karim", urf: "Karim Bhai",
+    family: "son of Marhoom Haji Rahim Bakhsh Khokhar of Jaipur, Chhawni",
+    city: "Indore", address: "Chhawni, near Jama Masjid",
+    janaza: "Chhawni Masjid", qabristan: "Luniya Pura Qabristan",
+    ziyaratPlace: "at home", jawai: "Khandwa", by: "Haji Mohammad Hussain - 90000 00000"
+  }
+};
+
+function fillDeathExample() {
+  var today = todayIso();
+  var ex = EXAMPLE_TEXT[currentLang];
+  getById("d_kind").value = "inteqal";
+  getById("d_gender").value = "male";
+  getById("d_name").value = ex.name;
+  getById("d_urf").value = ex.urf;
+  getById("d_age").value = "78";
+  getById("d_family").value = ex.family;
+  getById("d_cause").value = "qaza";
+  getById("d_city").value = ex.city;
+  getById("d_state").value = "mp";
+  getById("d_date").value = today;
+  getById("d_address").value = ex.address;
+  getById("d_tadfinDate").value = addDaysIso(today, 1);
+  getById("d_tadfinWhen").value = "zohar";
+  getById("d_janaza").value = ex.janaza;
+  getById("d_qabristan").value = ex.qabristan;
+  getById("d_addZiyarat").checked = true;
+  getById("d_ziyaratDate").value = addDaysIso(today, 2);
+  getById("d_ziyaratTime").value = "09:30";
+  getById("d_ziyaratPlace").value = ex.ziyaratPlace;
+  getById("d_jawai").value = ex.jawai;
+  getById("d_by").value = ex.by;
+  getById("exampleBar").hidden = false;
+}
+
+getById("sendDeath").addEventListener("click", sendDeathNotice);
+getById("modeCard").addEventListener("click", function () { setSendMode("card"); });
+getById("modeText").addEventListener("click", function () { setSendMode("text"); });
+getById("clearDeath").addEventListener("click", clearDeathForm);
+getById("d_kind").addEventListener("change", applyDeathKind);
+getById("d_addZiyarat").addEventListener("change", applyDeathKind);
+getById("d_addFateha").addEventListener("change", applyDeathKind);
+
+var deathInputs = document.querySelectorAll("#deathSection input, #deathSection select, #deathSection textarea");
+for (var di = 0; di < deathInputs.length; di++) {
+  deathInputs[di].addEventListener("input", updateDeath);
+  deathInputs[di].addEventListener("change", updateDeath);
+}
+
+function drawDivider(ctx, cx, y, halfLength) {
+  ctx.strokeStyle = COL.gold;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(cx - halfLength, y);
+  ctx.lineTo(cx - 16, y);
+  ctx.moveTo(cx + 16, y);
+  ctx.lineTo(cx + halfLength, y);
+  ctx.stroke();
+  ctx.fillStyle = COL.gold;
+  ctx.beginPath();
+  ctx.moveTo(cx, y - 7);
+  ctx.lineTo(cx + 7, y);
+  ctx.lineTo(cx, y + 7);
+  ctx.lineTo(cx - 7, y);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawHeading(ctx, text, y) {
+  setFont(ctx, "600", 40, FONT_HINDI);
+  ctx.fillStyle = COL.ink;
+  ctx.textAlign = "center";
+  ctx.fillText(text, CENTER_X, y);
+  var halfText = ctx.measureText(text).width / 2;
+  ctx.strokeStyle = COL.gold;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(CENTER_X - halfText - 30, y - 13);
+  ctx.lineTo(CENTER_X - halfText - 190, y - 13);
+  ctx.moveTo(CENTER_X + halfText + 30, y - 13);
+  ctx.lineTo(CENTER_X + halfText + 190, y - 13);
+  ctx.stroke();
+}
+
+function drawCalendarIcon(ctx, cx, cy, size) {
+  var s = size;
+  ctx.strokeStyle = COL.goldDark;
+  ctx.lineWidth = 2.5;
+  roundRectPath(ctx, cx - s / 2, cy - s / 2 + 4, s, s - 4, 5);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx - s / 2, cy - s / 2 + 14);
+  ctx.lineTo(cx + s / 2, cy - s / 2 + 14);
+  ctx.moveTo(cx - s / 4, cy - s / 2);
+  ctx.lineTo(cx - s / 4, cy - s / 2 + 8);
+  ctx.moveTo(cx + s / 4, cy - s / 2);
+  ctx.lineTo(cx + s / 4, cy - s / 2 + 8);
+  ctx.stroke();
+  ctx.fillStyle = COL.goldDark;
+  for (var row = 0; row < 2; row++) {
+    for (var col = 0; col < 3; col++) {
+      ctx.fillRect(cx - s / 3 + col * (s / 3) - 2, cy + 2 + row * (s / 5), 4, 4);
+    }
+  }
+}
+
+function drawClockIcon(ctx, cx, cy, size) {
+  ctx.strokeStyle = COL.goldDark;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.arc(cx, cy, size / 2, 0, Math.PI * 2);
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx, cy - size / 3);
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + size / 4, cy + size / 8);
+  ctx.stroke();
+}
+
+function drawPinIcon(ctx, cx, cy, size) {
+  var r = size / 2.6;
+  ctx.strokeStyle = COL.goldDark;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.arc(cx, cy - r / 2, r, Math.PI * 0.85, Math.PI * 2.15);
+  ctx.lineTo(cx, cy + size / 2);
+  ctx.closePath();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(cx, cy - r / 2, r / 2.6, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+function drawMosqueIcon(ctx, cx, cy, size) {
+  ctx.strokeStyle = COL.goldDark;
+  ctx.lineWidth = 2.5;
+  var half = size / 2;
+  var baseY = cy + half;
+  var bodyTop = cy + half * 0.1;
+  // ground line
+  ctx.beginPath();
+  ctx.moveTo(cx - half * 1.1, baseY);
+  ctx.lineTo(cx + half * 1.1, baseY);
+  // main body
+  ctx.moveTo(cx - half * 0.6, baseY);
+  ctx.lineTo(cx - half * 0.6, bodyTop);
+  ctx.lineTo(cx + half * 0.6, bodyTop);
+  ctx.lineTo(cx + half * 0.6, baseY);
+  ctx.stroke();
+  // onion dome
+  ctx.beginPath();
+  ctx.moveTo(cx - half * 0.55, bodyTop);
+  ctx.bezierCurveTo(cx - half * 0.75, cy - half * 0.45, cx - half * 0.1, cy - half * 0.55, cx, cy - half * 0.85);
+  ctx.bezierCurveTo(cx + half * 0.1, cy - half * 0.55, cx + half * 0.75, cy - half * 0.45, cx + half * 0.55, bodyTop);
+  ctx.stroke();
+  // door arch
+  ctx.beginPath();
+  ctx.moveTo(cx - half * 0.18, baseY);
+  ctx.lineTo(cx - half * 0.18, cy + half * 0.55);
+  ctx.arc(cx, cy + half * 0.55, half * 0.18, Math.PI, 0);
+  ctx.lineTo(cx + half * 0.18, baseY);
+  ctx.stroke();
+  // two minarets
+  ctx.beginPath();
+  ctx.moveTo(cx - half * 0.95, baseY);
+  ctx.lineTo(cx - half * 0.95, cy - half * 0.45);
+  ctx.moveTo(cx + half * 0.95, baseY);
+  ctx.lineTo(cx + half * 0.95, cy - half * 0.45);
+  ctx.stroke();
+  ctx.fillStyle = COL.goldDark;
+  ctx.beginPath();
+  ctx.arc(cx - half * 0.95, cy - half * 0.55, 3, 0, Math.PI * 2);
+  ctx.arc(cx + half * 0.95, cy - half * 0.55, 3, 0, Math.PI * 2);
+  ctx.fill();
+  // crescent tip on the dome
+  ctx.beginPath();
+  ctx.arc(cx, cy - half * 0.85 - 6, 3, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// Box with title, three columns (date / time / place) and an optional bottom line.
+function drawDetailsBox(ctx, box, y) {
+  var x = 120;
+  var w = CARD_W - 240;
+  var colW = w / 3;
+  setFont(ctx, "400", 25, FONT_HINDI);
+  var columnLines = [];
+  var maxLines = 1;
+  for (var i = 0; i < box.columns.length; i++) {
+    var value = box.columns[i].value || "—";
+    var lines = wrapText(ctx, value, colW - 34);
+    columnLines.push(lines);
+    if (lines.length > maxLines) { maxLines = lines.length; }
+  }
+  var bottomLines = [];
+  if (box.bottom) { bottomLines = wrapText(ctx, box.bottom, w - 70); }
+
+  var columnsBottom = y + 196 + maxLines * 36;
+  var height = columnsBottom - y + 10;
+  if (bottomLines.length > 0) { height = height + 30 + bottomLines.length * 36; }
+
+  roundRectPath(ctx, x, y, w, height, 22);
+  ctx.fillStyle = COL.boxFill;
+  ctx.fill();
+  ctx.strokeStyle = COL.goldSoft;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  setFont(ctx, "600", 30, FONT_HINDI);
+  ctx.fillStyle = COL.ink;
+  ctx.textAlign = "center";
+  ctx.fillText(box.title, CENTER_X, y + 52);
+  var halfTitle = ctx.measureText(box.title).width / 2;
+  ctx.fillStyle = COL.gold;
+  drawStar(ctx, CENTER_X - halfTitle - 24, y + 42, 9, 4);
+  drawStar(ctx, CENTER_X + halfTitle + 24, y + 42, 9, 4);
+
+  for (var c = 0; c < box.columns.length; c++) {
+    var colCenter = x + colW * c + colW / 2;
+    var icon = box.columns[c].icon;
+    if (icon === "calendar") { drawCalendarIcon(ctx, colCenter, y + 108, 38); }
+    if (icon === "clock") { drawClockIcon(ctx, colCenter, y + 108, 38); }
+    if (icon === "pin") { drawPinIcon(ctx, colCenter, y + 108, 40); }
+    if (icon === "mosque") { drawMosqueIcon(ctx, colCenter, y + 108, 40); }
+
+    setFont(ctx, "600", 25, FONT_HINDI);
+    ctx.fillStyle = COL.goldDark;
+    ctx.textAlign = "center";
+    ctx.fillText(box.columns[c].label, colCenter, y + 172);
+
+    setFont(ctx, "400", 25, FONT_HINDI);
+    ctx.fillStyle = COL.ink;
+    for (var k = 0; k < columnLines[c].length; k++) {
+      ctx.fillText(columnLines[c][k], colCenter, y + 212 + k * 36);
+    }
+    if (c > 0) {
+      ctx.strokeStyle = COL.goldSoft;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(x + colW * c, y + 84);
+      ctx.lineTo(x + colW * c, columnsBottom - 10);
+      ctx.stroke();
+    }
+  }
+
+  if (bottomLines.length > 0) {
+    ctx.strokeStyle = COL.goldSoft;
+    ctx.beginPath();
+    ctx.moveTo(x + 40, columnsBottom + 6);
+    ctx.lineTo(x + w - 40, columnsBottom + 6);
+    ctx.stroke();
+    setFont(ctx, "400", 25, FONT_HINDI);
+    ctx.fillStyle = COL.ink;
+    ctx.textAlign = "center";
+    for (var b = 0; b < bottomLines.length; b++) {
+      ctx.fillText(bottomLines[b], CENTER_X, columnsBottom + 46 + b * 36);
+    }
+  }
+  return y + height;
+}
+
+// "जवाई: सामोद के तगाले" — gold label, dark value, centered; wraps if long.
+function drawLabelValue(ctx, label, value, y) {
+  var maxWidth = 840;
+  setFont(ctx, "600", 27, FONT_HINDI);
+  var labelText = label + ": ";
+  var labelWidth = ctx.measureText(labelText).width;
+  setFont(ctx, "400", 27, FONT_HINDI);
+  var valueWidth = ctx.measureText(value).width;
+  if (labelWidth + valueWidth <= maxWidth) {
+    var startX = CENTER_X - (labelWidth + valueWidth) / 2;
+    ctx.textAlign = "left";
+    setFont(ctx, "600", 27, FONT_HINDI);
+    ctx.fillStyle = COL.goldDark;
+    ctx.fillText(labelText, startX, y);
+    setFont(ctx, "400", 27, FONT_HINDI);
+    ctx.fillStyle = COL.ink;
+    ctx.fillText(value, startX + labelWidth, y);
+    return y + 44;
+  }
+  setFont(ctx, "600", 27, FONT_HINDI);
+  ctx.fillStyle = COL.goldDark;
+  ctx.textAlign = "center";
+  ctx.fillText(label, CENTER_X, y);
+  setFont(ctx, "400", 27, FONT_HINDI);
+  ctx.fillStyle = COL.ink;
+  return drawWrappedCentered(ctx, value, CENTER_X, y + 40, maxWidth, 40) + 4;
+}
+
+
+
+// =====================================================================
+// OTHER ANNOUNCEMENTS (marriage, meeting, ...) — text message only
+// =====================================================================
+
 var UI = {
   hi: {
     title: "समाज सूचना फॉर्म",
@@ -167,8 +1824,7 @@ var UI = {
     noteGroup: "बटन दबाने पर WhatsApp खुलेगा। अपना समाज ग्रुप चुनें और Send दबाएं।",
     noteAdmin: "बटन दबाने पर संदेश एडमिन के पास जाएगा। एडमिन जांच कर ग्रुप में डालेंगे।",
     missing: "कृपया ये जानकारी भरें: ",
-    sharedBy: "- भेजने वाले: ",
-    contactLabel: "संपर्क"
+    sharedBy: "- भेजने वाले: "
   },
   en: {
     title: "Samaj Announcement Form",
@@ -187,70 +1843,45 @@ var UI = {
     noteGroup: "WhatsApp will open. Choose your samaj group and press Send.",
     noteAdmin: "The message will go to the admin, who will check it and post it in the group.",
     missing: "Please fill: ",
-    sharedBy: "- Shared by ",
-    contactLabel: "Contact"
+    sharedBy: "- Shared by "
   }
 };
 
-// Each field: key, label (hi/en), example (hi/en), required, kind ("text", "date", "long", "tel")
 var TYPES = [
+  { id: "inteqal", icon: "⚫", name: { hi: "खबर इंतक़ाल", en: "Death news" }, special: true },
   {
     id: "marriage", icon: "💐",
     name: { hi: "शादी", en: "Marriage" },
-    header: { hi: "💐 *शुभ विवाह* 💐", en: "💐 *Marriage Announcement* 💐" },
+    header: { hi: "💐 *शादी मुबारक* 💐", en: "💐 *Marriage Announcement* 💐" },
     fields: [
-      { key: "groom", hi: "दूल्हे का नाम", en: "Groom name", exHi: "चि. राहुल", exEn: "Rahul", required: true, intro: true },
-      { key: "bride", hi: "दुल्हन का नाम", en: "Bride name", exHi: "सौ.कां. प्रिया", exEn: "Priya", required: true, intro: true },
-      { key: "groomFamily", hi: "दूल्हे का परिवार", en: "Groom's family", exHi: "श्री सुरेश पटेल के पुत्र", exEn: "S/o Shri Suresh Patel" },
-      { key: "brideFamily", hi: "दुल्हन का परिवार", en: "Bride's family", exHi: "श्री महेश शाह की पुत्री", exEn: "D/o Shri Mahesh Shah" },
+      { key: "groom", hi: "दूल्हे का नाम", en: "Groom name", exHi: "अब्दुल रहमान", exEn: "Abdul Rehman", required: true, intro: true },
+      { key: "bride", hi: "दुल्हन का नाम", en: "Bride name", exHi: "शबनम बानो", exEn: "Shabnam Bano", required: true, intro: true },
+      { key: "groomFamily", hi: "दूल्हे का परिवार", en: "Groom's family", exHi: "हाजी अनवर भाई के लड़के", exEn: "S/o Haji Anwar Bhai" },
+      { key: "brideFamily", hi: "दुल्हन का परिवार", en: "Bride's family", exHi: "सलीम भाई की लड़की", exEn: "D/o Salim Bhai" },
       { key: "date", hi: "तारीख", en: "Date", kind: "date", required: true },
-      { key: "venue", hi: "स्थान", en: "Venue", exHi: "समाज भवन, वडोदरा", exEn: "Samaj Bhavan, Vadodara" },
-      { key: "contact", hi: "संपर्क नंबर", en: "Contact number", kind: "tel", exHi: "98765 43210", exEn: "98765 43210" }
+      { key: "venue", hi: "स्थान", en: "Venue", exHi: "जमात खाना, वडोदरा", exEn: "Jamat Khana, Vadodara" },
+      { key: "contact", hi: "संपर्क नंबर", en: "Contact number", kind: "tel", exHi: "98XXX XXXXX", exEn: "98XXX XXXXX" }
     ]
   },
   {
     id: "engagement", icon: "💍",
     name: { hi: "सगाई", en: "Engagement" },
-    header: { hi: "💍 *सगाई समाचार* 💍", en: "💍 *Engagement Announcement* 💍" },
+    header: { hi: "💍 *सगाई मुबारक* 💍", en: "💍 *Engagement Announcement* 💍" },
     fields: [
-      { key: "groom", hi: "लड़के का नाम", en: "Boy's name", exHi: "चि. राहुल", exEn: "Rahul", required: true, intro: true },
-      { key: "bride", hi: "लड़की का नाम", en: "Girl's name", exHi: "सौ.कां. प्रिया", exEn: "Priya", required: true, intro: true },
-      { key: "families", hi: "परिवार", en: "Families", exHi: "पटेल परिवार एवं शाह परिवार", exEn: "Patel family and Shah family" },
+      { key: "groom", hi: "लड़के का नाम", en: "Boy's name", exHi: "अब्दुल रहमान", exEn: "Abdul Rehman", required: true, intro: true },
+      { key: "bride", hi: "लड़की का नाम", en: "Girl's name", exHi: "शबनम बानो", exEn: "Shabnam Bano", required: true, intro: true },
+      { key: "families", hi: "परिवार", en: "Families", exHi: "खोखर परिवार एवं पवार परिवार", exEn: "Khokhar and Pawar families" },
       { key: "date", hi: "तारीख", en: "Date", kind: "date", required: true },
-      { key: "venue", hi: "स्थान", en: "Venue", exHi: "समाज भवन", exEn: "Samaj Bhavan" }
-    ]
-  },
-  {
-    id: "death", icon: "🙏",
-    name: { hi: "शोक संदेश", en: "Shok Sandesh" },
-    header: { hi: "🙏 *शोक संदेश* 🙏", en: "🙏 *Shok Sandesh* 🙏" },
-    closing: { hi: "ॐ शांति 🙏", en: "Om Shanti 🙏" },
-    fields: [
-      { key: "deceased", hi: "स्वर्गीय का नाम", en: "Name of the deceased", exHi: "श्री रमेशभाई पटेल", exEn: "Shri Rameshbhai Patel", required: true, intro: true },
-      { key: "age", hi: "उम्र", en: "Age", exHi: "72", exEn: "72", intro: true },
-      { key: "family", hi: "परिवार", en: "Family", exHi: "श्री सुरेश पटेल के पिताजी", exEn: "Father of Shri Suresh Patel" },
-      { key: "date", hi: "देहांत की तारीख", en: "Date of passing", kind: "date", required: true },
-      { key: "prayer", hi: "उठामणा / बेसणा", en: "Uthamna / Besna (prayer meet)", kind: "long", exHi: "28-10-2026, शाम 4 से 6 बजे", exEn: "28-10-2026, 4 PM to 6 PM", required: true },
-      { key: "venue", hi: "स्थान", en: "Venue", exHi: "समाज भवन, वडोदरा", exEn: "Samaj Bhavan, Vadodara" },
-      { key: "contact", hi: "संपर्क नंबर", en: "Contact number", kind: "tel", exHi: "98765 43210", exEn: "98765 43210" }
+      { key: "venue", hi: "स्थान", en: "Venue", exHi: "जमात खाना", exEn: "Jamat Khana" }
     ]
   },
   {
     id: "birth", icon: "👶",
-    name: { hi: "शुभ समाचार", en: "Birth" },
-    header: { hi: "🎉 *शुभ समाचार* 🎉", en: "🎉 *Good News* 🎉" },
+    name: { hi: "खुशखबरी", en: "Birth" },
+    header: { hi: "🎉 *खुशखबरी* 🎉", en: "🎉 *Good News* 🎉" },
     fields: [
-      { key: "parents", hi: "माता-पिता का नाम", en: "Parents' names", exHi: "श्री अमित एवं श्रीमती नेहा पटेल", exEn: "Amit and Neha Patel", required: true, intro: true },
-      { key: "baby", hi: "पुत्र / पुत्री", en: "Baby boy / baby girl", exHi: "पुत्र", exEn: "baby boy", intro: true },
-      { key: "date", hi: "तारीख", en: "Date", kind: "date" }
-    ]
-  },
-  {
-    id: "birthday", icon: "🎂",
-    name: { hi: "जन्मदिन", en: "Birthday" },
-    header: { hi: "🎂 *जन्मदिन की शुभकामनाएं* 🎂", en: "🎂 *Happy Birthday* 🎂" },
-    fields: [
-      { key: "person", hi: "किसका जन्मदिन", en: "Whose birthday", exHi: "श्री रमेशभाई पटेल", exEn: "Shri Rameshbhai Patel", required: true, intro: true },
+      { key: "parents", hi: "माता-पिता का नाम", en: "Parents' names", exHi: "सलीम भाई और रुखसाना", exEn: "Salim Bhai and Rukhsana", required: true, intro: true },
+      { key: "baby", hi: "बेटा / बेटी", en: "Baby boy / baby girl", exHi: "बेटा", exEn: "baby boy", intro: true },
       { key: "date", hi: "तारीख", en: "Date", kind: "date" }
     ]
   },
@@ -259,10 +1890,10 @@ var TYPES = [
     name: { hi: "मीटिंग", en: "Meeting" },
     header: { hi: "📢 *मीटिंग सूचना* 📢", en: "📢 *Meeting Notice* 📢" },
     fields: [
-      { key: "subject", hi: "विषय", en: "Subject", exHi: "वार्षिक सामान्य सभा", exEn: "Annual general meeting", required: true },
+      { key: "subject", hi: "विषय", en: "Subject", exHi: "जमात की सालाना मीटिंग", exEn: "Annual jamat meeting", required: true },
       { key: "date", hi: "तारीख", en: "Date", kind: "date", required: true },
-      { key: "time", hi: "समय", en: "Time", exHi: "शाम 5 बजे", exEn: "5 PM" },
-      { key: "venue", hi: "स्थान", en: "Venue", exHi: "समाज भवन", exEn: "Samaj Bhavan", required: true },
+      { key: "time", hi: "समय", en: "Time", exHi: "इशा बाद", exEn: "After Isha" },
+      { key: "venue", hi: "स्थान", en: "Venue", exHi: "जमात खाना", exEn: "Jamat Khana", required: true },
       { key: "agenda", hi: "मुख्य बातें", en: "Agenda", kind: "long", exHi: "हिसाब, नई कमेटी", exEn: "Accounts, new committee" }
     ]
   },
@@ -273,9 +1904,9 @@ var TYPES = [
     fields: [
       { key: "bloodGroup", hi: "ब्लड ग्रुप", en: "Blood group", exHi: "B+", exEn: "B+", required: true },
       { key: "units", hi: "कितनी यूनिट", en: "Units", exHi: "2", exEn: "2" },
-      { key: "patient", hi: "मरीज़ का नाम", en: "Patient name", exHi: "श्री अमित पटेल", exEn: "Amit Patel" },
+      { key: "patient", hi: "मरीज़ का नाम", en: "Patient name", exHi: "अनवर भाई", exEn: "Anwar Bhai" },
       { key: "hospital", hi: "अस्पताल", en: "Hospital", exHi: "SSG अस्पताल, वडोदरा", exEn: "SSG Hospital, Vadodara", required: true },
-      { key: "contact", hi: "संपर्क नंबर", en: "Contact number", kind: "tel", exHi: "98765 43210", exEn: "98765 43210", required: true }
+      { key: "contact", hi: "संपर्क नंबर", en: "Contact number", kind: "tel", exHi: "98XXX XXXXX", exEn: "98XXX XXXXX", required: true }
     ]
   },
   {
@@ -283,14 +1914,12 @@ var TYPES = [
     name: { hi: "अन्य सूचना", en: "Other news" },
     header: { hi: "📢 *सूचना* 📢", en: "📢 *Announcement* 📢" },
     fields: [
-      { key: "subject", hi: "विषय", en: "Subject", exHi: "समाज भवन की मरम्मत", exEn: "Samaj Bhavan repair work", required: true },
-      { key: "details", hi: "पूरी जानकारी", en: "Details", kind: "long", exHi: "रविवार को भवन बंद रहेगा", exEn: "The hall will be closed on Sunday", required: true }
+      { key: "subject", hi: "विषय", en: "Subject", exHi: "जमात खाने की मरम्मत", exEn: "Jamat Khana repair work", required: true },
+      { key: "details", hi: "पूरी जानकारी", en: "Details", kind: "long", exHi: "इतवार को जमात खाना बंद रहेगा", exEn: "The hall will be closed on Sunday", required: true }
     ]
   }
 ];
 
-// ---------------- STATE ----------------
-var currentLang = "hi";
 var currentType = TYPES[0];
 var savedValues = {};
 
@@ -301,40 +1930,26 @@ try {
 
 function text(key) { return UI[currentLang][key]; }
 
-function formatDate(isoDate) {
-  if (!isoDate) { return ""; }
-  var parts = isoDate.split("-");
-  return parts[2] + "-" + parts[1] + "-" + parts[0];
-}
-
-function todayIso() {
-  var d = new Date();
-  var month = String(d.getMonth() + 1).padStart(2, "0");
-  var day = String(d.getDate()).padStart(2, "0");
-  return d.getFullYear() + "-" + month + "-" + day;
-}
-
-// ---------------- BUILD THE PAGE ----------------
 function drawStaticText() {
   document.documentElement.lang = currentLang;
-  document.getElementById("tTitle").textContent = text("title");
-  document.getElementById("tSub").textContent = text("sub");
-  document.getElementById("tStep1").textContent = text("step1");
-  document.getElementById("tStep2").textContent = text("step2");
-  document.getElementById("tStep3").textContent = text("step3");
-  document.getElementById("tExtra").textContent = text("extra");
-  document.getElementById("tSender").textContent = text("sender");
-  document.getElementById("tOpt1").textContent = text("optional");
-  document.getElementById("tOpt2").textContent = text("optional");
-  document.getElementById("sendLink").textContent = text("send");
-  document.getElementById("copyBtn").textContent = text("copy");
-  document.getElementById("note").textContent = SEND_TO_NUMBER ? text("noteAdmin") : text("noteGroup");
-  document.getElementById("langHi").setAttribute("aria-pressed", currentLang === "hi" ? "true" : "false");
-  document.getElementById("langEn").setAttribute("aria-pressed", currentLang === "en" ? "true" : "false");
+  getById("tTitle").textContent = text("title");
+  getById("tSub").textContent = text("sub");
+  getById("tStep1").textContent = text("step1");
+  getById("tStep2").textContent = text("step2");
+  getById("tStep3").textContent = text("step3");
+  getById("tExtra").textContent = text("extra");
+  getById("tSender").textContent = text("sender");
+  getById("tOpt1").textContent = text("optional");
+  getById("tOpt2").textContent = text("optional");
+  getById("sendLink").textContent = text("send");
+  getById("copyBtn").textContent = text("copy");
+  getById("note").textContent = SEND_TO_NUMBER ? text("noteAdmin") : text("noteGroup");
+  getById("langHi").setAttribute("aria-pressed", currentLang === "hi" ? "true" : "false");
+  getById("langEn").setAttribute("aria-pressed", currentLang === "en" ? "true" : "false");
 }
 
 function drawTiles() {
-  var box = document.getElementById("tiles");
+  var box = getById("tiles");
   box.innerHTML = "";
   TYPES.forEach(function (type) {
     var button = document.createElement("button");
@@ -354,15 +1969,17 @@ function drawTiles() {
 }
 
 function rememberValues() {
+  if (currentType.special) { return; }
   currentType.fields.forEach(function (field) {
-    var input = document.getElementById("f_" + field.key);
+    var input = getById("f_" + field.key);
     if (input) { savedValues[field.key] = input.value; }
   });
 }
 
 function drawFields() {
-  var box = document.getElementById("fields");
+  var box = getById("fields");
   box.innerHTML = "";
+  if (currentType.special) { return; }
   currentType.fields.forEach(function (field) {
     var wrap = document.createElement("div");
     wrap.className = "field";
@@ -387,7 +2004,6 @@ function drawFields() {
     input.id = "f_" + field.key;
     var example = currentLang === "hi" ? field.exHi : field.exEn;
     if (example) { input.placeholder = text("example") + example; }
-
     if (savedValues[field.key] !== undefined) { input.value = savedValues[field.key]; }
     else if (field.kind === "date") { input.value = todayIso(); }
 
@@ -396,16 +2012,18 @@ function drawFields() {
     wrap.appendChild(input);
     box.appendChild(wrap);
   });
-  document.body.setAttribute("data-type", currentType.id);
 }
 
 function chooseType(type) {
   rememberValues();
   currentType = type;
+  getById("deathSection").hidden = !type.special;
+  getById("genericSection").hidden = !!type.special;
   drawTiles();
   drawFields();
   hideError();
   updatePreview();
+  if (type.special) { updateDeath(); }
 }
 
 function changeLanguage(lang) {
@@ -413,14 +2031,16 @@ function changeLanguage(lang) {
   currentLang = lang;
   try { localStorage.setItem("samajLang", lang); } catch (e) {}
   drawStaticText();
+  applyDeathLanguage();
+  if (!getById("exampleBar").hidden) { fillDeathExample(); applyDeathKind(); }
   drawTiles();
   drawFields();
   updatePreview();
+  updateDeath();
 }
 
-// ---------------- MESSAGE ----------------
 function readValue(key) {
-  var input = document.getElementById("f_" + key);
+  var input = getById("f_" + key);
   if (!input) { return ""; }
   return input.value.trim();
 }
@@ -433,43 +2053,28 @@ function introLine(type) {
     if (groom && bride) { return hi ? "*" + groom + "* संग *" + bride + "*" : "*" + groom + "* & *" + bride + "*"; }
     return "";
   }
-  if (type.id === "death") {
-    var name = readValue("deceased");
-    if (!name) { return ""; }
-    var age = readValue("age");
-    if (hi) {
-      return "अत्यंत दुःख के साथ सूचित किया जाता है कि *" + name + "*" + (age ? " (उम्र " + age + " वर्ष)" : "") + " का देहांत हो गया है।";
-    }
-    return "With deep sorrow we inform that *" + name + "*" + (age ? " (age " + age + ")" : "") + " has passed away.";
-  }
   if (type.id === "birth") {
     var parents = readValue("parents");
     if (!parents) { return ""; }
     var baby = readValue("baby");
-    if (hi) { return parents + " के घर " + (baby || "संतान") + " का जन्म हुआ है। हार्दिक बधाई!"; }
+    if (hi) { return parents + " के घर " + (baby || "बच्चे") + " की पैदाइश हुई है। मुबारकबाद!"; }
     return parents + " are blessed with " + (baby || "a baby") + ". Congratulations!";
-  }
-  if (type.id === "birthday") {
-    var person = readValue("person");
-    if (!person) { return ""; }
-    return hi ? "*" + person + "* को जन्मदिन की हार्दिक शुभकामनाएं!" : "Wishing *" + person + "* a very happy birthday!";
   }
   return "";
 }
 
 function buildMessage() {
+  if (currentType.special) { return ""; }
   var lines = [];
   lines.push(currentType.header[currentLang]);
   lines.push("");
-
   var intro = introLine(currentType);
   if (intro) { lines.push(intro); lines.push(""); }
-
   currentType.fields.forEach(function (field) {
     if (field.intro) { return; }
     var value = readValue(field.key);
     if (!value) { return; }
-    if (field.kind === "date") { value = formatDate(value); }
+    if (field.kind === "date") { value = formatDateSlash(value); }
     if (field.kind === "long") {
       lines.push("*" + field[currentLang] + ":*");
       lines.push(value);
@@ -477,33 +2082,23 @@ function buildMessage() {
       lines.push("*" + field[currentLang] + ":* " + value);
     }
   });
-
-  var extra = document.getElementById("f_extra").value.trim();
+  var extra = getById("f_extra").value.trim();
   if (extra) { lines.push(""); lines.push(extra); }
-
-  if (currentType.closing) { lines.push(""); lines.push(currentType.closing[currentLang]); }
-
-  var sender = document.getElementById("f_sender").value.trim();
+  var sender = getById("f_sender").value.trim();
   if (sender) { lines.push(""); lines.push(text("sharedBy") + sender); }
-
   return lines.join("\n");
-}
-
-function whatsappLink(message) {
-  return "https://wa.me/" + SEND_TO_NUMBER + "?text=" + encodeURIComponent(message);
 }
 
 function updatePreview() {
   var message = buildMessage();
-  document.getElementById("preview").textContent = message;
-  document.getElementById("sendLink").href = whatsappLink(message);
+  getById("preview").textContent = message;
+  getById("sendLink").href = "https://wa.me/" + SEND_TO_NUMBER + "?text=" + encodeURIComponent(message);
 }
 
-// ---------------- CHECKING ----------------
 function findMissingFields() {
   var missing = [];
   currentType.fields.forEach(function (field) {
-    var wrap = document.getElementById("w_" + field.key);
+    var wrap = getById("w_" + field.key);
     wrap.classList.remove("bad");
     if (field.required && readValue(field.key) === "") {
       missing.push(field[currentLang]);
@@ -513,53 +2108,68 @@ function findMissingFields() {
   return missing;
 }
 
-function hideError() { document.getElementById("errBox").hidden = true; }
+function hideError() { getById("errBox").hidden = true; }
 
-document.getElementById("sendLink").addEventListener("click", function (event) {
+getById("sendLink").addEventListener("click", function (event) {
   var missing = findMissingFields();
   if (missing.length > 0) {
     event.preventDefault();
-    var box = document.getElementById("errBox");
+    var box = getById("errBox");
     box.textContent = text("missing") + missing.join(", ");
     box.hidden = false;
-    var firstBad = document.querySelector(".field.bad input, .field.bad textarea");
+    var firstBad = document.querySelector("#genericSection .field.bad input, #genericSection .field.bad textarea");
     if (firstBad) { firstBad.focus(); }
     return;
   }
   hideError();
 });
 
-document.getElementById("copyBtn").addEventListener("click", function () {
-  var note = document.getElementById("note");
-  var message = buildMessage();
-  try {
-    navigator.clipboard.writeText(message).then(function () {
-      note.textContent = text("copied");
-    }, function () { selectPreview(); });
-  } catch (e) { selectPreview(); }
-});
-
 function selectPreview() {
   var range = document.createRange();
-  range.selectNodeContents(document.getElementById("preview"));
+  range.selectNodeContents(getById("preview"));
   var selection = window.getSelection();
   selection.removeAllRanges();
   selection.addRange(range);
-  document.getElementById("note").textContent = text("selectHint");
+  getById("note").textContent = text("selectHint");
 }
 
-document.getElementById("langHi").addEventListener("click", function () { changeLanguage("hi"); });
-document.getElementById("langEn").addEventListener("click", function () { changeLanguage("en"); });
-document.getElementById("f_extra").addEventListener("input", updatePreview);
-document.getElementById("f_sender").addEventListener("input", updatePreview);
+getById("copyBtn").addEventListener("click", function () {
+  copyText(buildMessage(), function () {
+    getById("note").textContent = text("copied");
+  }, selectPreview);
+});
 
-// ---------------- START ----------------
-// Example values so the first screen shows a real message. Clear and type your own.
-savedValues = {};
+getById("langHi").addEventListener("click", function () { changeLanguage("hi"); });
+getById("langEn").addEventListener("click", function () { changeLanguage("en"); });
+getById("f_extra").addEventListener("input", updatePreview);
+getById("f_sender").addEventListener("input", updatePreview);
+
+// =====================================================================
+// START
+// =====================================================================
+
+applyDeathLanguage();
+getById("d_group").value = DEFAULT_GROUP_LINE;
+getById("d_date").value = todayIso();
+getById("d_tadfinDate").value = todayIso();
+if (FILL_EXAMPLE) { fillDeathExample(); }
+
 drawStaticText();
+applyDeathLanguage();
 drawTiles();
-drawFields();
-updatePreview();
+chooseType(TYPES[0]);
+applyDeathKind();
+
+// Redraw the card once the Hindi and Arabic fonts have loaded.
+if (document.fonts && document.fonts.load) {
+  Promise.all([
+    document.fonts.load('400 30px "Noto Serif Devanagari"', "अ Aa 0123"),
+    document.fonts.load('600 30px "Noto Serif Devanagari"', "अ Aa 0123"),
+    document.fonts.load('700 70px "Noto Serif Devanagari"', "अ Aa 0123"),
+    document.fonts.load('400 34px "Amiri"', "إِنَّا"),
+    document.fonts.load('700 38px "Amiri"', "إِنَّا")
+  ]).then(updateDeath, updateDeath);
+}
 </script>
 </body>
 </html>
