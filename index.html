@@ -318,6 +318,8 @@ details .bubble { margin-top: 10px; }
     </section>
   </div>
 
+  <p class="note" style="text-align:center">Version 8 · centred text fix</p>
+
   <!-- ===================== OTHER ANNOUNCEMENTS ===================== -->
   <div id="genericSection" class="stack" hidden>
     <section>
@@ -891,6 +893,75 @@ var FONT_HINDI = '"Noto Serif Devanagari", "Nirmala UI", "Mangal", serif';
 var FONT_ARABIC = '"Amiri", "Traditional Arabic", "Arial", serif';
 var ARCH = { x: CENTER_X - 150, y: 96, w: 300, h: 370 };
 
+// ---------------------------------------------------------------------
+// Some phones report a wrong text width for Hindi text on a canvas,
+// which pushes centred text to the right. We draw a sample once per font,
+// count the real pixels, and correct every width with that ratio.
+// ---------------------------------------------------------------------
+var inkCanvas = document.createElement("canvas");
+inkCanvas.width = 3000;
+inkCanvas.height = 220;
+var widthRatioCache = {};
+var SAMPLE_HINDI = "इन्ना लिल्लाहि व इन्ना इलैहि राजिऊन 28/10/2026 Abdul";
+var SAMPLE_ARABIC = "إِنَّا لِلَّٰهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ";
+
+function widthRatioFor(ctx) {
+  var key = ctx.font + "|" + ctx.direction;
+  if (widthRatioCache[key] !== undefined) { return widthRatioCache[key]; }
+  var sample = ctx.font.indexOf("Amiri") >= 0 ? SAMPLE_ARABIC : SAMPLE_HINDI;
+  var ink = inkCanvas.getContext("2d", { willReadFrequently: true });
+  ink.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+  ink.font = ctx.font;
+  ink.direction = "ltr";
+  ink.textAlign = "left";
+  ink.textBaseline = "alphabetic";
+  ink.fillStyle = "#000000";
+  ink.fillText(sample, 100, 150);
+  var reported = ink.measureText(sample).width;
+  var pixels = ink.getImageData(0, 0, inkCanvas.width, inkCanvas.height).data;
+  var leftMost = -1;
+  var rightMost = -1;
+  for (var x = 0; x < inkCanvas.width; x++) {
+    for (var y = 0; y < inkCanvas.height; y++) {
+      if (pixels[(y * inkCanvas.width + x) * 4 + 3] > 0) {
+        if (leftMost < 0) { leftMost = x; }
+        rightMost = x;
+        break;
+      }
+    }
+  }
+  var ratio = 1;
+  if (leftMost >= 0 && reported > 0) {
+    var real = rightMost - leftMost + 1;
+    ratio = real / reported;
+    // Small differences are normal (letter edges); only fix real mistakes.
+    if (Math.abs(ratio - 1) < 0.06) { ratio = 1; }
+  }
+  widthRatioCache[key] = ratio;
+  return ratio;
+}
+
+function trueWidth(ctx, text) {
+  return ctx.measureText(text).width * widthRatioFor(ctx);
+}
+
+// Draws text; centred text is placed by hand using the corrected width.
+function drawText(ctx, text, x, y) {
+  if (ctx.textAlign !== "center") {
+    ctx.fillText(text, x, y);
+    return;
+  }
+  var width = trueWidth(ctx, text);
+  ctx.textAlign = "left";
+  if (ctx.direction === "rtl") {
+    ctx.textAlign = "right";
+    ctx.fillText(text, x + width / 2, y);
+  } else {
+    ctx.fillText(text, x - width / 2, y);
+  }
+  ctx.textAlign = "center";
+}
+
 function setFont(ctx, weight, size, family) {
   ctx.font = weight + " " + size + "px " + family;
 }
@@ -901,7 +972,7 @@ function wrapText(ctx, text, maxWidth) {
   var line = "";
   for (var i = 0; i < words.length; i++) {
     var test = line === "" ? words[i] : line + " " + words[i];
-    if (ctx.measureText(test).width > maxWidth && line !== "") {
+    if (trueWidth(ctx, test) > maxWidth && line !== "") {
       lines.push(line);
       line = words[i];
     } else {
@@ -916,7 +987,7 @@ function drawWrappedCentered(ctx, text, centerX, y, maxWidth, lineHeight) {
   var lines = wrapText(ctx, text, maxWidth);
   ctx.textAlign = "center";
   for (var i = 0; i < lines.length; i++) {
-    ctx.fillText(lines[i], centerX, y);
+    drawText(ctx, lines[i], centerX, y);
     y = y + lineHeight;
   }
   return y;
@@ -1131,11 +1202,11 @@ function drawTopBlessing(ctx) {
   ctx.direction = "rtl";
   setFont(ctx, "700", 42, FONT_ARABIC);
   ctx.fillStyle = COL.ink;
-  ctx.fillText("إِنَّا لِلَّٰهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ", CENTER_X, 222);
+  drawText(ctx, "إِنَّا لِلَّٰهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ", CENTER_X, 222);
   ctx.direction = "ltr";
   setFont(ctx, "400", 24, FONT_HINDI);
   ctx.fillStyle = COL.muted;
-  ctx.fillText(word("duaFull"), CENTER_X, 268);
+  drawText(ctx, word("duaFull"), CENTER_X, 268);
   drawDivider(ctx, CENTER_X, 304, 120);
 }
 
@@ -1185,7 +1256,7 @@ function drawCard(ctx, data, H) {
   var nameText = data.name || "—";
   var nameSize = 76;
   setFont(ctx, "700", nameSize, FONT_HINDI);
-  while (ctx.measureText(nameText).width > 860 && nameSize > 50) {
+  while (trueWidth(ctx, nameText) > 860 && nameSize > 50) {
     nameSize = nameSize - 2;
     setFont(ctx, "700", nameSize, FONT_HINDI);
   }
@@ -1197,7 +1268,7 @@ function drawCard(ctx, data, H) {
     setFont(ctx, "400", 30, FONT_HINDI);
     ctx.fillStyle = COL.muted;
     ctx.textAlign = "center";
-    ctx.fillText("(" + word("urf") + " " + data.urf + ")", CENTER_X, y);
+    drawText(ctx, "(" + word("urf") + " " + data.urf + ")", CENTER_X, y);
   }
 
   y = y + 44;
@@ -1208,7 +1279,7 @@ function drawCard(ctx, data, H) {
     setFont(ctx, "400", 30, FONT_HINDI);
     ctx.fillStyle = COL.muted;
     ctx.textAlign = "center";
-    ctx.fillText(ageText(data), CENTER_X, y);
+    drawText(ctx, ageText(data), CENTER_X, y);
   }
 
   var placeDate = joinFilled([dateWithDay(data.date), cityLine(data)], "  ·  ");
@@ -1217,9 +1288,9 @@ function drawCard(ctx, data, H) {
     setFont(ctx, "400", 29, FONT_HINDI);
     ctx.fillStyle = COL.ink;
     ctx.textAlign = "center";
-    var halfWidth = ctx.measureText(placeDate).width / 2;
+    var halfWidth = trueWidth(ctx, placeDate) / 2;
     if (halfWidth < 400) {
-      ctx.fillText(placeDate, CENTER_X + 22, y);
+      drawText(ctx, placeDate, CENTER_X + 22, y);
       drawCalendarIcon(ctx, CENTER_X - halfWidth - 14, y - 10, 30);
     } else {
       y = drawWrappedCentered(ctx, placeDate, CENTER_X, y, 840, 42) - 42;
@@ -1267,7 +1338,7 @@ function drawCard(ctx, data, H) {
     setFont(ctx, "600", 25, FONT_HINDI);
     ctx.fillStyle = COL.goldDark;
     ctx.textAlign = "center";
-    ctx.fillText(word("by"), CENTER_X, y);
+    drawText(ctx, word("by"), CENTER_X, y);
     setFont(ctx, "400", 26, FONT_HINDI);
     ctx.fillStyle = COL.muted;
     y = y + 6;
@@ -1569,8 +1640,8 @@ function drawHeading(ctx, text, y) {
   setFont(ctx, "600", 40, FONT_HINDI);
   ctx.fillStyle = COL.ink;
   ctx.textAlign = "center";
-  ctx.fillText(text, CENTER_X, y);
-  var halfText = ctx.measureText(text).width / 2;
+  drawText(ctx, text, CENTER_X, y);
+  var halfText = trueWidth(ctx, text) / 2;
   ctx.strokeStyle = COL.gold;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
@@ -1707,8 +1778,8 @@ function drawDetailsBox(ctx, box, y) {
   setFont(ctx, "600", 30, FONT_HINDI);
   ctx.fillStyle = COL.ink;
   ctx.textAlign = "center";
-  ctx.fillText(box.title, CENTER_X, y + 52);
-  var halfTitle = ctx.measureText(box.title).width / 2;
+  drawText(ctx, box.title, CENTER_X, y + 52);
+  var halfTitle = trueWidth(ctx, box.title) / 2;
   ctx.fillStyle = COL.gold;
   drawStar(ctx, CENTER_X - halfTitle - 24, y + 42, 9, 4);
   drawStar(ctx, CENTER_X + halfTitle + 24, y + 42, 9, 4);
@@ -1724,12 +1795,12 @@ function drawDetailsBox(ctx, box, y) {
     setFont(ctx, "600", 25, FONT_HINDI);
     ctx.fillStyle = COL.goldDark;
     ctx.textAlign = "center";
-    ctx.fillText(box.columns[c].label, colCenter, y + 172);
+    drawText(ctx, box.columns[c].label, colCenter, y + 172);
 
     setFont(ctx, "400", 25, FONT_HINDI);
     ctx.fillStyle = COL.ink;
     for (var k = 0; k < columnLines[c].length; k++) {
-      ctx.fillText(columnLines[c][k], colCenter, y + 212 + k * 36);
+      drawText(ctx, columnLines[c][k], colCenter, y + 212 + k * 36);
     }
     if (c > 0) {
       ctx.strokeStyle = COL.goldSoft;
@@ -1751,7 +1822,7 @@ function drawDetailsBox(ctx, box, y) {
     ctx.fillStyle = COL.ink;
     ctx.textAlign = "center";
     for (var b = 0; b < bottomLines.length; b++) {
-      ctx.fillText(bottomLines[b], CENTER_X, columnsBottom + 46 + b * 36);
+      drawText(ctx, bottomLines[b], CENTER_X, columnsBottom + 46 + b * 36);
     }
   }
   return y + height;
@@ -1762,24 +1833,24 @@ function drawLabelValue(ctx, label, value, y) {
   var maxWidth = 840;
   setFont(ctx, "600", 27, FONT_HINDI);
   var labelText = label + ": ";
-  var labelWidth = ctx.measureText(labelText).width;
+  var labelWidth = trueWidth(ctx, labelText);
   setFont(ctx, "400", 27, FONT_HINDI);
-  var valueWidth = ctx.measureText(value).width;
+  var valueWidth = trueWidth(ctx, value);
   if (labelWidth + valueWidth <= maxWidth) {
     var startX = CENTER_X - (labelWidth + valueWidth) / 2;
     ctx.textAlign = "left";
     setFont(ctx, "600", 27, FONT_HINDI);
     ctx.fillStyle = COL.goldDark;
-    ctx.fillText(labelText, startX, y);
+    drawText(ctx, labelText, startX, y);
     setFont(ctx, "400", 27, FONT_HINDI);
     ctx.fillStyle = COL.ink;
-    ctx.fillText(value, startX + labelWidth, y);
+    drawText(ctx, value, startX + labelWidth, y);
     return y + 44;
   }
   setFont(ctx, "600", 27, FONT_HINDI);
   ctx.fillStyle = COL.goldDark;
   ctx.textAlign = "center";
-  ctx.fillText(label, CENTER_X, y);
+  drawText(ctx, label, CENTER_X, y);
   setFont(ctx, "400", 27, FONT_HINDI);
   ctx.fillStyle = COL.ink;
   return drawWrappedCentered(ctx, value, CENTER_X, y + 40, maxWidth, 40) + 4;
