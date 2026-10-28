@@ -1440,7 +1440,7 @@ function sendDeathNotice() {
   if (isPhone()) {
     var jpegBlob = dataUrlToBlob(canvas.toDataURL("image/jpeg", 0.93));
     var file = new File([jpegBlob], cardFileName(data, "jpg"), { type: "image/jpeg" });
-    var shareData = { files: [file], text: shortCaption(data) };
+    var shareData = { files: [file] };
     if (navigator.canShare && navigator.canShare(shareData)) {
       navigator.share(shareData).then(function () {
         setDeathNote(dt("doneShared"));
@@ -1465,7 +1465,8 @@ function sendDeathNotice() {
     downloadBlob(pngBlob, cardFileName(data, "png"));
     setDeathNote(dt("doneComputerDownload"), true);
   }
-  openWhatsApp(shortCaption(data));
+  // Open WhatsApp with an empty message box, so only the pasted card is sent.
+  window.open("https://web.whatsapp.com/", "_blank");
 }
 
 function clearDeathForm() {
